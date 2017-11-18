@@ -12,10 +12,8 @@ lang: fr
 
 \newpage
 
-# ALLO YANICK
-
 # a)
-Tout d'abord, nous observons la série chronologique suivante concernant le taux de change américain/européen depuis janvier 1999 jusqu'é décembre 2016. Les données ont été collectées de faéon quotidienne pour ensuite étre transformées mensuellement. Voici le résultat:
+Tout d'abord, nous observons la série chronologique suivante concernant le taux de change américain/européen depuis janvier 1999 jusqu'é décembre 2016. Les données ont été collectées de façon quotidienne pour ensuite étre transformées mensuellement. Voici le résultat:
 
 
 ```{r graphique_A, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
@@ -34,13 +32,13 @@ ttaux<-ts(rendement,start=c(1999,1),end=c(2016,12),frequency = 12)
 plot(ttaux,ylab='USD/Euro', xlab="Temps", main="Figure 1: taux de change US/Euro", type="o")
 ```
 
-Gréce é une premiére analyse, on remarque sur le tableau de la fonction d'autocorrélation échantillonale (ACF) qu'il y a une forte présence d'autocorrélation et que celle-ci diminue lentement plus le lag augmente (voir figure 2). On peut donc déduire que le processus est non-stationnaire. Il n'est pas nécessaire de poursuivre notre analyse avec le graphique de la fonction d'autocorrélation partielle (PACF) puisque nous devrons effectuer une différentiation sur le modéle pour créer l'effet de stationnarité.
+Grâce à une premiére analyse, on remarque sur le tableau de la fonction d'autocorrélation échantillonale (ACF) qu'il y a une forte présence d'autocorrélation et que celle-ci diminue lentement plus le lag augmente (voir figure 2). On peut donc déduire que le processus est non-stationnaire. Il n'est pas nécessaire de poursuivre notre analyse avec le graphique de la fonction d'autocorrélation partielle (PACF) puisque nous devrons effectuer une différentiation sur le modéle pour créer l'effet de stationnarité.
 
 ```{r acf, eval=TRUE, echo=FALSE,fig.height=3.5}
 acf(ttaux, main="Figure 2: fonction d'autocorrélation")
 ```
 
-Il nous est possible d'utiliser Box-Cox afin de transformer notre processus puisque les données sont positives. En ce faisant, la variance diminuera. On rappelle que la famille des fonctions de puissance est définie de la faéon suivante:
+Il est possible d'utiliser Box-Cox afin de transformer notre processus puisque les données sont positives. En ce faisant, la variance diminuera. On rappelle que la famille des fonctions de puissance est définie de la façon suivante:
 
 $$
 \begin{aligned}
@@ -54,7 +52,7 @@ $\lambda$ est donc déterminé en maximisant la fonction de log-vraisemblance de
 BoxCox.ar(ttaux)
 ```
 
-On constate que $\lambda = 0.1$ semble étre l'estimé MLE situé au centre de l'intervalle de confiance 95%, soit $]-0.5, 0.7[$. Puisque $\lambda = 0$ est dans notre IC, le paramétre peut également étre une valeur é considérer. Donc, on utilise la transformée logarithmique pour notre modéle.
+On constate que $\lambda = 0.1$ semble étre l'estimé MLE situé au centre de l'intervalle de confiance 95%, soit $]-0.5, 0.7[$. Puisque $\lambda = 0$ est dans notre IC, le paramètre peut également étre une valeur à considérer. Donc, on utilise la transformé logarithmique pour notre modéle.
 
 Cependant, en analysant le graphique de la fonction d'autocorrélation du logarithme de  notre série, on remarque qu'il n'y a pas de variation notable. PLUGGER LA THéORIE DE YAN SUR LE MFE PI LES SHIT DE RENDEMENT.
 
