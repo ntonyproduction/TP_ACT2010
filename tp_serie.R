@@ -194,6 +194,15 @@ Box.test(residuals(ttaux013), lag=10, type="Ljung-Box", fitdf=1)
 #selon cette p value, le modele N'EST PAS APPROPRIE
 #inutile de rajouter des graphiques sachant que le modele n'est pas approprie
 
+###surparametrisation
+## on test les modeles ARIMA(2,1,1), ARIMA(1,1,2) et ARIMA(0,1,2)
+arima(log(ttaux), order=c(2,1,1), method='ML')
+#2e coeffient tres pres de 0, on rejette
+arima(log(ttaux), order=c(1,1,2), method='ML')
+#theta2 significativement different de 0, aller plus loin avec ARIMA(1,1,2)?
+arima(log(ttaux), order=c(0,1,2), method='ML')
+#theta2 tres pres de 0, on rejette
+
 
 #################################################
 #                 QUESTION 2                     #
