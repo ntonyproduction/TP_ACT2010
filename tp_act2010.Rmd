@@ -12,6 +12,8 @@ lang: fr
 
 \newpage
 
+# ALLO YANICK
+
 # a)
 Tout d'abord, nous observons la série chronologique suivante concernant le taux de change américain/européen depuis janvier 1999 jusqu'é décembre 2016. Les données ont été collectées de faéon quotidienne pour ensuite étre transformées mensuellement. Voici le résultat:
 
