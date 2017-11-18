@@ -116,8 +116,83 @@ ttaux111<-arima(log(ttaux), order=c(1,1,1), method='ML')
 ttaux013<-arima(diff(log(ttaux)), order=c(0,1,3), method='ML', fixe=c(0, 0, NA) )
 ####### etude des residus ###########
 
-#ARMA(0,1,1)  
+###ARIMA(0,1,1)
+
+##graphique des residus
 plot(rstandard(ttaux011), ylab='résidus standardisés', type='o')
+abline(h=0)
+#distance superieur a 2 frequente ce qui est anormale pour un bruit blanc normal
+1-pnorm(2) #prob d'avoir un res superieur ou inferieur a 2
+
+##test de normalite
+#histogramme
+hist(rstandard(ttaux011), xlab='résidus standardisés')
+#graphique des quantiles (qq plot)
+qqnorm(rstandard(ttaux011))
+qqline(rstandard(ttaux011))
+#test de shapiro wilk
+shapiro.test(rstandard(ttaux011))
+#la p-value ne permet pas de rejetter l'hypothese de normalite
+
+##test d'independance
+#run test
+runs(residuals(ttaux011))$pvalue
+#on ne rejette pas H0 a 5%, les residus sont indep
+#autocorrelation des residus
+acf(residuals(ttaux011))
+#les residus ne semblent pas correle
+
+###ARIMA(1,1,1)
+
+##graphique des residus
+plot(rstandard(ttaux111), ylab='résidus standardisés', type='o')
+abline(h=0)
+hist(rstandard(ttaux111), xlab='résidus standardisés')
+qqnorm(rstandard(ttaux111))
+qqline(rstandard(ttaux111))
+shapiro.test(rstandard(ttaux111))
+#la p-value ne permet pas de rejetter l'hypothese de normalite
+runs(residuals(ttaux111))$pvalue
+#on ne rejette pas H0 5%, les residus sont indep
+acf(residuals(ttaux111))
+#les residus ne semblent pas correle
+
+
+###ARIMA(0,1,3)
+plot(rstandard(ttaux013), ylab='résidus standardisés', type='o')
+abline(h=0)
+hist(rstandard(ttaux013), xlab='résidus standardisés')
+qqnorm(rstandard(ttaux013))
+qqline(rstandard(ttaux013))
+shapiro.test(rstandard(ttaux013))
+#la p-value ne permet pas de rejetter l'hypothese de stationnarite
+runs(residuals(ttaux013))$pvalue
+#on rejette pas H0 a 5%, les residus NE SONT PAS INDEP
+acf(residuals(ttaux013))
+#les residus presentent des anomalies
+#ce modele ne semble pas approprie selon les 2 derniers tests
+
+
+####### justesse du modele et surparametrisation ###########
+
+###ARIMA(0,1,1)
+#test de ljung-box pour l'importance relative de residus une fois additionnes
+Box.test(residuals(ttaux011), lag=10, type="Ljung-Box", fitdf=1)
+#selon cette p value, le modele est approprie
+tsdiag(ttaux011, gof=15, omit.initial=F)
+#toutes les p values sont superieur a 5% on accepte ce modele qui est plus simple que le prochain
+
+
+###ARIMA(1,1,1)
+Box.test(residuals(ttaux111), lag=10, type="Ljung-Box", fitdf=1)
+#selon cette p value, le modele est approprie
+tsdiag(ttaux111, gof=15, omit.initial=F)
+
+
+###ARIMA(0,1,3)
+Box.test(residuals(ttaux013), lag=10, type="Ljung-Box", fitdf=1)
+#selon cette p value, le modele N'EST PAS APPROPRIE
+#inutile de rajouter des graphiques sachant que le modele n'est pas approprie
 
 
 #################################################
