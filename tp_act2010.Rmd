@@ -1,0 +1,68 @@
+---
+title: ""
+author:
+- 
+output: 
+  pdf_document: 
+    toc: yes
+    number_sections: False
+documentclass: article
+lang: fr  
+---
+
+\newpage
+
+# a)
+Tout d'abord, nous observons la série chronologique suivante concernant le taux de change américain/européen depuis janvier 1999 jusqu'à décembre 2016. Les données ont été collectées de façon quotidienne pour ensuite être transformées mensuellement. Voici le résultat:
+
+
+```{r graphique_A, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
+library('TSA')
+library('tseries')
+
+# Importation des données
+taux <- read.csv2("C:/Users/angag426/Desktop/nouveau/Taux_de_change_US_Euro.csv")
+rendement<-taux$US.Euro
+anne.mois<-taux$Année.mois
+
+# création de la série chronologique
+ttaux<-ts(rendement,start=c(1999,1),end=c(2016,12),frequency = 12)
+
+# graphique de la série
+plot(ttaux,ylab='USD/Euro', xlab="Temps", main="Figure 1: taux de change US/Euro", type="o")
+```
+
+Grâce à une première analyse, on remarque sur le tableau de la fonction d'autocorrélation échantillonale (ACF) qu'il y a une forte présence d'autocorrélation et que celle-ci diminue lentement plus le lag augmente (voir figure 2). On peut donc déduire que le processus est non-stationnaire. Il n'est pas nécessaire de poursuivre notre analyse avec le graphique de la fonction d'autocorrélation partielle (PACF) puisque nous devrons effectuer une différentiation sur le modèle pour créer l'effet de stationnarité.
+
+```{r acf, eval=TRUE, echo=FALSE,fig.height=3.5}
+acf(ttaux, main="Figure 2: fonction d'autocorrélation")
+```
+
+Il nous est possible d'utiliser Box-Cox afin de transformer notre processus puisque les données sont positives. En ce faisant, la variance diminuera. On rappelle que la famille des fonctions de puissance est définie de la façon suivante:
+
+$$
+\begin{aligned}
+g(x) = \frac{x^{\lambda}-1}{\lambda} \times 1_{\{\lambda \neq 0 \}} + \text{ln}(x) \times 1_{\{\lambda = 0 \}}
+\end{aligned}
+$$
+
+$\lambda$ est donc déterminé en maximisant la fonction de log-vraisemblance de nos données que voici:
+
+```{r BoxCox, eval=T, echo=F, fig.height=3.5, message=FALSE, warning=FALSE}
+BoxCox.ar(ttaux)
+```
+
+On constate que $\lambda = 0.1$ semble être l'estimé MLE situé au centre de l'intervalle de confiance 95%, soit $]-0.5, 0.7[$. Puisque $\lambda = 0$ est dans notre IC, le paramètre peut également être une valeur à considérer. Donc, on utilise la transformée logarithmique pour notre modèle.
+
+Cependant, en analysant le graphique de la fonction d'autocorrélation du logarithme de  notre série, on remarque qu'il n'y a pas de variation notable. PLUGGER LA THÉORIE DE YAN SUR LE MFE PI LES SHIT DE RENDEMENT.
+
+
+
+\newpage
+
+# Annexe
+
+```{r ref1, ref.label="graphique_A", echo=TRUE, eval=FALSE}
+
+```
+
