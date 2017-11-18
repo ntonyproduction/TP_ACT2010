@@ -1,5 +1,5 @@
-library('TSA')
-library('tseries')
+#library('TSA')
+#library('tseries')
 
 #################################################
 #           TP1 SERIE CHRONO                    #
@@ -12,7 +12,7 @@ library('tseries')
 
 ######## importation et traitement primaire du jeu de donnees ###########
 #importation du jeu de donnees
-taux <- read.csv2("C:/Users/angag426/Desktop/TP_ACT2010/Taux_de_change_US_Euro.csv")
+taux <- read.csv2("C:/Users/TEMP/Desktop/tempo/Taux_de_change_US_Euro.csv")
 #taux <- read.csv2("C:/Users/Yanic/ulaval/Séries chronologiques/tp/Taux_de_change_US_Euro.csv")
 rendement<-taux$US.Euro
 anne.mois<-taux$Année.mois
@@ -23,7 +23,6 @@ ttaux<-ts(rendement,start=c(1999,1),end=c(2016,12),frequency = 12)
 #on trace le graphique
 win.graph(height=4,width=6)
 plot(ttaux,ylab='taux de change', type='o', xlab='année', main='Taux de change ')
-abline(h=1)
 
 #on observe difficilement de stationnarité, 
 #forte aurocorrelation, decroissance tres lente avec l'augmentation 
@@ -42,7 +41,7 @@ BoxCox.ar(ttaux)$ci
 #pour retrouve le rendement de notre taux de change
 #le rendement permet de comparer deux produits fianciers ayant des valeurs differentes entres eux
 
-plot(as.vector(log(ttaux)), type='o', ylab='logarithme du taux', cex=0.5)
+plot(as.vector(log(ttaux)), type='o', ylab='logarithme du taux')
 #avec une premiere differenciation
 plot(as.vector(diff(log(ttaux))), type='o', ylab='différencitation du logarithme')
 #la premiere differenciation semble plutot stable
