@@ -12,16 +12,17 @@ lang: fr
 
 \newpage
 
-# a)
+# Numéro 1
+## a)
 Tout d'abord, nous observons la série chronologique suivante concernant le taux de change américain/européen depuis janvier 1999 jusqu'é décembre 2016. Les données ont été collectées de façon quotidienne pour ensuite étre transformées mensuellement. Voici le résultat:
 
 
-```{r graphique_A, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
+```{r graphique_A, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, fig.height=3.3}
 library('TSA')
 library('tseries')
 
 # Importation des données
-taux <- read.csv2("C:/Users/angag426/Desktop/nouveau/TP_ACT2010/Taux_de_change_US_Euro.csv")
+taux <- read.csv2("C:/Users/angag426/Desktop/TP_ACT2010/Taux_de_change_US_Euro.csv")
 rendement<-taux$US.Euro
 anne.mois<-taux$Année.mois
 
@@ -29,15 +30,18 @@ anne.mois<-taux$Année.mois
 ttaux<-ts(rendement,start=c(1999,1),end=c(2016,12),frequency = 12)
 
 # graphique de la série
-plot(ttaux,ylab='USD/Euro', xlab="Temps", main="Figure 1: taux de change US/Euro", type="o")
+plot(ttaux,ylab='USD/Euro', xlab="Temps", main="Figure 1: taux de change US/Euro", type="o", cex=0.5)
+abline(h=1)
 ```
 
+## b)
 Grâce à une premiére analyse, on remarque sur le tableau de la fonction d'autocorrélation échantillonale (ACF) qu'il y a une forte présence d'autocorrélation et que celle-ci diminue lentement plus le lag augmente (voir figure 2). On peut donc déduire que le processus est non-stationnaire. Il n'est pas nécessaire de poursuivre notre analyse avec le graphique de la fonction d'autocorrélation partielle (PACF) puisque nous devrons effectuer une différentiation sur le modéle pour créer l'effet de stationnarité.
 
 ```{r acf, eval=TRUE, echo=FALSE,fig.height=3.5}
 acf(ttaux, main="Figure 2: fonction d'autocorrélation")
 ```
 
+## c)
 Il est possible d'utiliser Box-Cox afin de transformer notre processus puisque les données sont positives. En ce faisant, la variance diminuera. On rappelle que la famille des fonctions de puissance est définie de la façon suivante:
 
 $$
@@ -48,13 +52,30 @@ $$
 
 $\lambda$ est donc déterminé en maximisant la fonction de log-vraisemblance de nos données que voici:
 
-```{r BoxCox, eval=T, echo=F, fig.height=3.5, message=FALSE, warning=FALSE}
+```{r BoxCox, eval=T, echo=F, fig.height=3.3, message=FALSE, warning=FALSE}
 BoxCox.ar(ttaux)
 ```
 
-On constate que $\lambda = 0.1$ semble étre l'estimé MLE situé au centre de l'intervalle de confiance 95%, soit $]-0.5, 0.7[$. Puisque $\lambda = 0$ est dans notre IC, le paramètre peut également étre une valeur à considérer. Donc, on utilise la transformé logarithmique pour notre modéle.
+On constate que $\lambda = 0.1$ semble étre l'estimé MLE situé au centre de l'intervalle de confiance 95%, soit $]-0.5, 0.7[$. Puisque $\lambda = 0$ est dans notre IC, cette valeur du paramètre peut également étre à considérer. Donc, on utilise la transformé logarithmique pour notre modèle (voir figure 3).
 
-Cependant, en analysant le graphique de la fonction d'autocorrélation du logarithme de  notre série, on remarque qu'il n'y a pas de variation notable. PLUGGER LA THéORIE DE YAN SUR LE MFE PI LES SHIT DE RENDEMENT.
+```{r log_processus, eval=T, echo=F, fig.height=3.3}
+plot(log(ttaux), type='o', ylab='log', main="Figure 3: logarithme du taux", cex=0.5)
+abline(h=0)
+```
+
+
+Cependant, en analysant le graphique de la fonction d'autocorrélation du logarithme de  notre série, on remarque qu'il n'y a pas de variation notable. Le modèle est toujours non stationnaire. PLUGGER LA THéORIE DE YAN SUR LE MFE PI LES SHIT DE RENDEMENT.
+
+## d)
+En revanche, si on effectue une première différentiation du log de notre série, on obtient la série de la figure 4 qui semble plus stable.
+
+```{r diff_log, eval=T, echo=F, fig.height=3.3}
+plot(diff(log(ttaux)), type='o', ylab='différencitation du logarithme', main = "Figure 4: différencitation du logarithme")
+```
+
+On vérifie alors si une première différentiation amène la stationnarité à notre processus en utilisant le test augmenté de Dickey-Fuller (ADF). On se concentre sur la partie autorégressive et on obtient un processus AR(2). Par la suite, on applique le test ADF à 95% et on obtient comme estimé $a/\sigma_a$, $t_{DF} = -1.0134$, avec une p-value de 0.9343. Le test semble corroborer que la série chronologique est stationnaire, i.e qu'une première différenciation doit s'appliquer.
+
+## e)
 
 
 
@@ -65,4 +86,8 @@ Cependant, en analysant le graphique de la fonction d'autocorrélation du logari
 ```{r ref1, ref.label="graphique_A", echo=TRUE, eval=FALSE}
 
 ```
-
+```{r ADF, eval=F, echo=T}
+# Test augmenté de Dickey-Fuller (ADF)
+ar(log(ttaux))
+adf.test(log(ttaux), k=2)
+```
