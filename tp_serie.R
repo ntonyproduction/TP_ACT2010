@@ -1,6 +1,6 @@
 library('TSA')
 library('tseries')
-
+#allo
 #################################################
 #           TP1 SERIE CHRONO                    #
 #################################################
@@ -15,7 +15,7 @@ library('tseries')
 taux <- read.csv2("C:/Users/angag426/Desktop/nouveau/Taux_de_change_US_Euro.csv")
 #taux <- read.csv2("C:/Users/Yanic/ulaval/SÃ©ries chronologiques/tp/Taux_de_change_US_Euro.csv")
 rendement<-taux$US.Euro
-anne.mois<-taux$Année.mois
+anne.mois<-taux$Ann?e.mois
 #on transforme en time serie
 ttaux<-ts(rendement,start=c(1999,1),end=c(2016,12),frequency = 12)
 
