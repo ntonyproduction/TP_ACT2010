@@ -12,7 +12,7 @@
 
 ######## importation et traitement primaire du jeu de donnees ###########
 #importation du jeu de donnees
-taux <- read.csv2("C:/Users/TEMP/Desktop/tempo/Taux_de_change_US_Euro.csv")
+taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
 #taux <- read.csv2("C:/Users/Yanic/ulaval/Séries chronologiques/tp/Taux_de_change_US_Euro.csv")
 rendement<-taux$US.Euro
 anne.mois<-taux$Année.mois
@@ -71,7 +71,7 @@ adf.test(diff(log(ttaux)),k=1)
 
 #autocorrelation et autocorrelation partielle
 acf(diff(log(ttaux)))
-#WTF IS A LAG DE 0.1 (echelle du graphique sortie)?
+#WTF IS A LAG DE 0.1 (echelle du graphique sortie)? Réponse: Diviser en mois.
 #On semble avoir un modele AR(1) pour la partie autoregressive
 #On semble meme pouvoir ignorer la partie MA puisque l'autocorrelation est tres faible apres?
 #(aller demander au prof pourquoi la conclusion de MA(0) a la page 88 du chap6 parce qu'on a ici la meme conclusion)
