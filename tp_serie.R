@@ -12,8 +12,8 @@
 
 ######## importation et traitement primaire du jeu de donnees ###########
 #importation du jeu de donnees
-taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
-#taux <- read.csv2("C:/Users/Yanic/ulaval/Séries chronologiques/tp/Taux_de_change_US_Euro.csv")
+#taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
+taux <- read.csv2("C:/Users/TEMP/Desktop/tempo/TP_ACT2010/Taux_de_change_US_Euro.csv")
 rendement<-taux$US.Euro
 anne.mois<-taux$Année.mois
 #on transforme en time serie
@@ -212,7 +212,7 @@ arima(log(ttaux), order=c(0,1,2), method='ML')
 #importation du jeu de donnees
 saaq <- read.csv2("C:/Users/TEMP/Desktop/tempo/TP_ACT2010/SAAQ-2015.csv")
 #saaq <- read.csv2("C:/Users/Yanic/ulaval/Séries chronologiques/tp/SAAQ-2015.csv")
-naadc<-ts(saaq$NAADC,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
+naadc<-ts(saaq$NAADC,start=c(saaq$Année[1],1),end=c(saaq$Année[length(saaq$Année)],1), frequency=1)
 npa<-ts(saaq$NPA,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
 ndi<-ts(saaq$NDI,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
 cti<-ts(saaq$CTI,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
@@ -229,7 +229,7 @@ cti<-ts(saaq$CTI,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
 ######### premiere analyse de la serie grace a son graphique et a sa fonction d'autocorrelation ##########
 #on trace le graphique
 win.graph(height=3.875,width=6, pointsize=8)
-plot(naadc,ylab="nombres d'accidents")
+plot(saaq$NAADC,ylab="nombres d'accidents",type='o')
 
 #on observe difficilement de stationnarité, 
 #L'autocorrelation décroisse rapidement signe de stationnarité 
@@ -239,6 +239,8 @@ acf(naadc, main='autocorrélation NAADC')
 pacf(naadc, main='autocorrélation NAADC')
 
 ######### on verifie si une transformation est appropriee ######
+#Pourquoi on dit skipper boxcox si il y a stationnarite tandis
+#qua la page 85 on fait une transformation meme s'il y a stationnarite?
 
 BoxCox.ar(naadc)
 BoxCox.ar(naadc)$mle
@@ -248,22 +250,32 @@ BoxCox.ar(naadc)$ci
 #pourquoi l'intervalle ne va pas plus pas que -2?
 
 plot(as.vector(naadc^(-2)), type='o')
-#dure a dire pour la stationnarite, les valeurs sont minusciles
+#dure a dire pour la stationnarite, les valeurs sont minuscules
 acf(naadc^(-2))
 pacf(naadc^(-2))
 #AR de degree 1 fortement suggere
 
 ######### tests de stationnarite ########
 
-#test ADF pour la stationnarite
+###test ADF pour la stationnarite
+##naadc^(-2)
 #on trouve d'abord la valeur de l'ordre AR(k) suggere par R
 ar(naadc^(-2))
 #R suggere d'utiliser k=2
 adf.test(naadc^(-2), k=2)
 #suggere la stationnarite avec p value de 48%
 
+##naadc^(1)
+#on trouve d'abord la valeur de l'ordre AR(k) suggere par R
+ar(naadc)
+#R suggere d'utiliser k=2
+adf.test(naadc, k=2)
+#suggere la stationnarite avec p value de 25%
+
+
 ######## on cherche le modele de notre serie maintenant stationnaire ############
 
+##naadc^(-2)
 #autocorrelation et autocorrelation partielle
 acf(naadc^(-2))
 pacf(naadc^(-2))
@@ -271,17 +283,45 @@ pacf(naadc^(-2))
 
 #qu'est ce que eacf en pense?
 
-eacf(naadc)
-#eacf ne fonctionne pas... pourquoi, deja stationnaire donc fonctionne pas?
+eacf(naadc^(-2),ar.max=5, ma.max=5)
+#eacf suggere AR(1) ou AR(2)
 
-#ON CHOISI DONC UN MODELE AR(1) pour le Yt^(-2)
+##naadc
+#acf et pacf on deja ete trace
+eacf(naadc,ar.max=5,ma.max=5)
+#encore AR(1) ou AR(2)
 
 ####### estimation des parametres ###########
 
-#voir la page 4 du chapitre 7 pour les explications
-#estimateur de phi1 avec d'autres estimateurs
-phi1<-acf(naadc^(-2))$acf[1]
-#estimateur de la variance du bruit blanc
-lam0<-var(naadc^(-2))
-naadc_sige2<-(1-phi1^2)*lam0
-naadc_sige2
+##naadc^(-2)
+#pour AR(1)
+naadc2001<-arima(naadc^(-2), order=c(1,0,0), method='ML')
+#on ne peut utiliser la fonction 'arma' qui calcul les coefficients
+#car elle utilise les moindres carrees
+#intercepte nul a cause du ^(-2) ou reellement nul?
+#pour AR(2)
+naadc2002<-arima(naadc^(-2), order=c(2,0,0), method='ML')
+#qu'est ce qu'on entends par propriete de ces estimateurs dans la question?
+mean(naadc^(-2))
+mean(naadc^(-2))^(-1/2)
+
+##naadc
+#pour AR(1)
+naadc001<-arima(naadc, order=c(1,0,0), method='ML')
+#on ne peut utiliser la fonction 'arma' qui calcul les coefficients
+#car elle utilise les moindres carrees
+#intercepte nul a cause du ^(-2) ou reellement nul?
+#pour AR(2)
+naadc002<-arima(naadc, order=c(2,0,0), method='ML')
+mean(naadc)
+
+######## etude des residus ###########
+
+###naadc^(-2)
+##ARMA(0,1)
+
+##graphique des residus
+plot(rstandard(naadc2001), ylab='résidus standardisés', type='o')
+abline(h=0)
+#distance superieur a 3 pour 
+1-pnorm(2) #prob d'avoir un res superieur ou inferieur a 2
