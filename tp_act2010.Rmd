@@ -22,7 +22,7 @@ library('TSA')
 library('tseries')
 
 # Importation des données
-taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
+taux <- read.csv2("C:/Users/ANGAG426/Desktop/TP_ACT2010/Taux_de_change_US_Euro.csv")
 rendement<-taux$US.Euro
 anne.mois<-taux$Année.mois
 
