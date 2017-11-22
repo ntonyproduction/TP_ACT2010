@@ -210,8 +210,8 @@ arima(log(ttaux), order=c(0,1,2), method='ML')
 
 ######## importation et traitement primaire du jeu de donnees ###########
 #importation du jeu de donnees
-#saaq <- read.csv2("C:/Users/TEMP.ULAVAL/Desktop/nouveau/SAAQ-2015  .csv")
-saaq <- read.csv2("C:/Users/Yanic/ulaval/Séries chronologiques/tp/SAAQ-2015.csv")
+saaq <- read.csv2("C:/Users/TEMP/Desktop/tempo/TP_ACT2010/SAAQ-2015.csv")
+#saaq <- read.csv2("C:/Users/Yanic/ulaval/Séries chronologiques/tp/SAAQ-2015.csv")
 naadc<-ts(saaq$NAADC,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
 npa<-ts(saaq$NPA,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
 ndi<-ts(saaq$NDI,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
