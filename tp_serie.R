@@ -1,5 +1,5 @@
-#library('TSA')
-#library('tseries')
+library('TSA')
+library('tseries')
 
 #################################################
 #           TP1 SERIE CHRONO                    #
@@ -12,7 +12,7 @@
 
 ######## importation et traitement primaire du jeu de donnees ###########
 #importation du jeu de donnees
-taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
+taux <- read.csv2("C:/Users/ANGAG426/Desktop/TP_ACT2010/Taux_de_change_US_Euro.csv")
 #taux <- read.csv2("C:/Users/Yanic/ulaval/Séries chronologiques/tp/Taux_de_change_US_Euro.csv")
 rendement<-taux$US.Euro
 anne.mois<-taux$Année.mois
