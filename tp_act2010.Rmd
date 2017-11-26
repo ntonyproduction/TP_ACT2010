@@ -93,13 +93,7 @@ On observe les fonctions d'autocorrélation et d'autocorrélation affichées aux
 \newline\newline
 On observe ensuite la fonction d'autocorrélation étendue afin de voir si ce test à un autre modèle à proposer. Le tableau de la fonction EACF est à la \textit{Table I}. On observe d'abord de ce tableau que le modèle ARMA(1,1) est suggéré pour la différentiation de notre modèle transformé initial. On peut également chercher à savoir si la valeur du $o$ en ARMA(0,1) et du $x$ en ARMA(1,1) sont significativement différent de leur valeurs inverses, sans quoi le modèle ARMA(1,1) serait également suggeré par le tableau EACF. Cependant, comme il fut déjà décidé d'évaluer la pertinance du modèle ARMA(1,1) suite à l'analyse des fonction d'autocorrélation et d'autocorrélation partielle, il n'est pas nécéssaire de test la pertiance de ce modèle selon le EACF.
 \newline\newline
-Le dernier test effectué pour ajuster un modèle à notre série chronologique
-
-
-
-
-
-
+Le dernier test effectué pour ajuster un modèle à notre série chronologique est le test du BIC. Grâce aux fonction 
 
 
 
