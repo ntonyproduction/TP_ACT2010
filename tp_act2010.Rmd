@@ -89,11 +89,63 @@ On effectue alors à nouveau , suite à une première différentiation, le test 
 
 Maintenant que la série est stationnaire, on peut en identifier le modèle. La première différentiation du logarithme du taux de change US/Euro sera dorénevent notre modèle de base. On fera ainsi référence à ce modèle par défaut. 
 \newline\newline
-On observe les fonctions d'autocorrélation et d'autocorrélation affichées aux \textit{Figure 6} et \textit{Figure 7} de la série à l'étude. On remarque que la fonction d'autocorrélation suggère fortement un modèle à moyenne mobile d'ordre 1 pour notre modèle tansformé alors que la fonction d'autocorrélation partielle suggère un modèle autorégressif d'ordre 1. On testera alors également le modèle ARMA(1,1) qui est suggérer par la combinaison de ces graphiques.
+On observe les fonctions d'autocorrélation et d'autocorrélation affichées aux \textit{Figure 6} et \textit{Figure 7} de la série à l'étude. On remarque que la fonction d'autocorrélation suggère fortement un modèle à moyenne mobile d'ordre 1, soit IMA(1,1) pour notre modèle tansformé alors que la fonction d'autocorrélation partielle suggère un modèle autorégressif d'ordre 1, soit ARI(1,1). On testera alors également le modèle ARIMA(1,1,1) qui est suggérer par la combinaison de ces graphiques.
 \newline\newline
-On observe ensuite la fonction d'autocorrélation étendue afin de voir si ce test à un autre modèle à proposer. Le tableau de la fonction EACF est à la \textit{Table I}. On observe d'abord de ce tableau que le modèle ARMA(1,1) est suggéré pour la différentiation de notre modèle transformé initial. On peut également chercher à savoir si la valeur du $o$ en ARMA(0,1) et du $x$ en ARMA(1,1) sont significativement différent de leur valeurs inverses, sans quoi le modèle ARMA(1,1) serait également suggeré par le tableau EACF. Cependant, comme il fut déjà décidé d'évaluer la pertinance du modèle ARMA(1,1) suite à l'analyse des fonction d'autocorrélation et d'autocorrélation partielle, il n'est pas nécéssaire de test la pertiance de ce modèle selon le EACF.
+On observe ensuite la fonction d'autocorrélation étendue afin de voir si ce test à un autre modèle à proposer. Le tableau de la fonction EACF est à la \textit{Table I}. On observe d'abord de ce tableau que le modèle IMA(1,1) est suggéré pour la différentiation de notre modèle transformé initial. On peut également chercher à savoir si la valeur du $o$ en ARMA(0,1) et du $x$ en ARMA(1,1) sont significativement différent de leur valeurs inverses ($x$ pour le $o$ et vice versa), sans quoi le modèle ARIMA(1,1,1) serait également suggeré par le tableau EACF. Cependant, comme il fut déjà décidé d'évaluer la pertinance du modèle ARIMA(1,1,1) suite à l'analyse des fonction d'autocorrélation et d'autocorrélation partielle, il n'est pas nécessaire de test la pertiance de ce modèle selon le EACF.
 \newline\newline
-Le dernier test effectué pour ajuster un modèle à notre série chronologique est le test du BIC. Grâce aux fonction 
+Le dernier test effectué pour ajuster un modèle à notre série chronologique est le test du BIC. Le tableau du BIC est tracé à la \textit{Table II} propose un modèle ARI(1,1). L'ordre maximal de moyenne mobile pour ce test a été établi à 1, sans quoi la fonction \textit{armasubsets} permettant de tracer le tableau du BIC retourne des avertissements de forte dépendance linéaire entre les paramètres. On étudiera ainsi les quatre tests proposés par les tests précédents qui peuvent être résumé de la façon suivante;
+
+$$
+\begin{tabular}{| l | r |}
+  \hline
+  \multicolumn{2}{|c|}{Résumé}\\
+  \hline
+  Tests et tableaux & Modèles suggérés \\ \hline \hline
+  ACF & IMA(1,1) \\
+    & ARIMA(1,1,1) \\ \hline
+  PACF & ARI(1,1) \\
+    & ARIMA(1,1,1)\\ \hline
+  EACF & IMA(1,1) \\ \hline
+  BIC & ARI(1,1) \\ 
+  \hline
+ \end{tabular}
+$$
+
+On teste alors les modèles ARI(1,1), IMA(1,1) et ARIMA(1,1,1) qui sont développé, dans l'ordre, des façons suivantes.
+
+$$
+\begin{aligned}
+W_t-\mu &= \phi (W_{t-1}-\mu) + e_t \qquad \qquad \qquad &(1)\\
+W_t -\mu&= e_t-\theta e_{t-1} \qquad \qquad \qquad &(2)\\
+W_t- \mu&= \phi (W_{t-1}-\mu) + e_t-\theta e_{t-1} \qquad \qquad \qquad &(3)\\
+\end{aligned}
+$$
+Où
+$$
+W_t=\nabla log(Y_t)
+$$
+Et $e_t$ est un bruit blanc et $\mu$ la moyenne de la série chronologique non-centrée. Il est ici important de noter que les paramètres estimés $\hat{\theta}$ et $\hat{\phi}$ ne seront pas les mêmes dans les trois modèles et devront donc être estimés pour chacun d'entre eux.
+
+##Estimation des paramètres des différents modèles et test de résidus
+
+```{r no1.5, echo=F}
+#IMA(1,1)
+ttaux011<-arima(log(ttaux), order=c(0,1,1), method='ML')
+#ARI(1,1)
+ttaux011<-arima(log(ttaux), order=c(1,1,0), method='ML')
+#ARIMA(1,1,1)
+ttaux111<-arima(log(ttaux), order=c(1,1,1), method='ML')
+#moyenne
+ttaux.log.mu<-mean(diff(log(ttaux)))
+ttaux.mu<- 1
+```
+On estime alors les valeurs des différents paramètres selon la méthode du maximum de vraisemblance à l'aide de la fonction $arima$. Les résultats se trouvent à la \textit{Table III}. TESTER SI LES MU SONT VRAIMENT 0 OU SI CEST JUSTE A CAUSE DU LOG
+
+
+
+
+
+
 
 
 
@@ -210,6 +262,27 @@ pacf(diff(log(ttaux)), main='', ylab='PACF')
 eacf(diff(log(ttaux)))
 ```
 \textbf{Table I.} Tableau de la fonction EACF de la première différentiation du logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.
+
+```{r table1.2, eval=T, echo=F, fig.height=3.3}
+plot(armasubsets(y=diff(log(ttaux)), nar=10, nma=1, y.name='test',ar.method='ols'))
+```
+\textbf{Table II.} Tableau de la fonction BIC de la première différentiation du logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.
+
+$$
+\begin{tabular}{| l c | r |}
+  \hline
+  Tests et tableaux & Modèles suggérés & res \\ \hline \hline
+  aRI(1,1) & $\mu$ & 1\\
+    & $\phi$ & 2\\ \hline
+  IMA(1,1) & $\mu$ & 1\\
+    & $\theta$ & 2\\ \hline
+  ARIMA(1,1,1) & $\mu$ & 1\\
+    & $\phi$ & 2\\
+    & $\theta$ & 2\\
+  \hline
+ \end{tabular}
+$$
+\textbf{Table II.} Tableau des valeurs estimées des différents coefficients obtenus de la fonction \textit{arima} pour les trois modèles à l'étude du logarithme du taux de change US/Euro. FINIR CE TABLEAU
 
 \newpage
 
