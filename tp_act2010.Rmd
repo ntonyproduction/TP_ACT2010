@@ -132,14 +132,18 @@ Et $e_t$ est un bruit blanc et $\mu$ la moyenne de la série chronologique non-c
 #IMA(1,1)
 ttaux011<-arima(log(ttaux), order=c(0,1,1), method='ML')
 #ARI(1,1)
-ttaux011<-arima(log(ttaux), order=c(1,1,0), method='ML')
+ttaux110<-arima(log(ttaux), order=c(1,1,0), method='ML')
 #ARIMA(1,1,1)
 ttaux111<-arima(log(ttaux), order=c(1,1,1), method='ML')
 #moyenne
 ttaux.log.mu<-mean(diff(log(ttaux)))
-ttaux.mu<- 1
+
+#test des residus
+
 ```
-On estime alors les valeurs des différents paramètres selon la méthode du maximum de vraisemblance à l'aide de la fonction $arima$. Les résultats se trouvent à la \textit{Table III}. TESTER SI LES MU SONT VRAIMENT 0 OU SI CEST JUSTE A CAUSE DU LOG
+On estime alors les valeurs des différents paramètres selon la méthode du maximum de vraisemblance à l'aide de la fonction $arima$. Les résultats se trouvent à la \textit{Table III}.
+\newline\newline
+On peut alors faire l'analyse de nos résidus pour faire notre choix parmi nos trois modèles. Les résidus de ces trois modèles sont tracés à la \textit{Figure 8}.
 
 
 
@@ -153,44 +157,6 @@ On estime alors les valeurs des différents paramètres selon la méthode du max
 
 
 
-
-
-## d)
-En revanche, si on effectue une première différentiation du log de notre série, on obtient la série de la figure 4 qui semble plus stable.
-
-```{r diff_log, eval=T, echo=F, fig.height=3.3}
-plot(diff(log(ttaux)), type='o', ylab='différencitation du logarithme', main = "Figure 4: différencitation du logarithme")
-```
-
-On vérifie alors si une première différentiation amène la stationnarité à notre processus en utilisant le test augmenté de Dickey-Fuller (ADF). En ce concentrant sur la partie autorégressive, on obtient un processus AR(1) associé à notre modèle de la première différenciation du logarithme. Par la suite, on applique le test ADF à 95% et on obtient comme estimé $a/\sigma_a$, $t_{DF} = -9.5181$, avec une p-value de 0.01. Le test semble corroborer que la série chronologique est stationnaire, i.e qu'une première différenciation doit s'appliquer.
-
-## e)
-On cherche maintenant le modèle de notre série stationnaire. En observant le graphique ACF et PACF de la figure 5 et 6. Il est à noter que le lag est exprimé en année, ce qui veut dire que 0.1 équivaut à 1/10 d'année et que 0.5 équivaut à 6 mois.
-
-```{r, eval=T, echo=F, fig.height=3.3}
-acf(diff(log(ttaux)), main="Figure 5: ACF de la différence du logarithme")
-pacf(diff(log(ttaux)), main="Figure 6: PACF de la différence du logarithme")
-```
-
-Il semblerait que l'on soit en présence d'un ARIMA(1,1,0) en se fiant au tableau ACF. Pour ce qui est du graphique PACF, on observe une ARIMA(0,1,1). Nous confirmons le tout avec la fonction d'autocorrélation étendue (EACF) ci-dessous.
-
-```{r, eval=T, echo=F, fig.height=3.3}
-eacf(diff(log(ttaux)))
-```
-
-Ce graphique porte à croire que l'on est en présence d'un modèle ARIMA(0,1,1), i.e. IMA(1). On continue notre analyse en appliquant le critère d'information Bayesienne (BIC).
-
-```{r, eval=T, echo=F, fig.height=3.3}
-plot(armasubsets(y=diff(log(ttaux)), nar=3, nma=3, y.name='test',ar.method='ols'))
-```
-
-Nous concluons à partir de ce graphique que le meilleur modèle à considérer est l'ARIMA(0,1,3).
-
-Pour résumé, après avoir analyser les différents graphiques de corrélation et les différents tests, nous considérerons les 3 modèles suivants basés sur le logarithme:
-
-* ARIMA(1,1,0);
-* ARIMA(0,1,1);
-* ARIMA(0,1,3).
 
 ## f)
 Par la suite, il faut estimer les paramètres de chacun des modèles énumérés en (e) par la méthode du maximum de vraisemblance (MLE).
@@ -214,6 +180,19 @@ log Y_t = 1,2933\ log Y_{t-1} - 0.2933\ logY_{t-2} + e_t
 $$
 Pour l'ARIMA(0,1,3), le paramètre $\phi_1$ de notre AR(1) est de 0.2933, ce qui nous donne le modèle suivante:
 # voir chapitre 5 pour écrire le modèle
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \newpage
 
@@ -272,17 +251,22 @@ $$
 \begin{tabular}{| l c | r |}
   \hline
   Tests et tableaux & Modèles suggérés & res \\ \hline \hline
-  aRI(1,1) & $\mu$ & 1\\
-    & $\phi$ & 2\\ \hline
-  IMA(1,1) & $\mu$ & 1\\
-    & $\theta$ & 2\\ \hline
-  ARIMA(1,1,1) & $\mu$ & 1\\
-    & $\phi$ & 2\\
-    & $\theta$ & 2\\
+  ARI(1,1) & $\mu$ & 0\\
+    & $\phi$ & $`r round(ttaux011$coef,4)`$\\ \hline
+  IMA(1,1) & $\mu$ & 0\\
+    & $\theta$ & $`r round(ttaux110$coef,4)`$\\ \hline
+  ARIMA(1,1,1) & $\mu$ & 0\\
+    & $\phi$ & `r round(ttaux111$coef[1],4)`\\
+    & $\theta$ & `r round(ttaux111$coef[2],4)`\\
   \hline
  \end{tabular}
 $$
-\textbf{Table II.} Tableau des valeurs estimées des différents coefficients obtenus de la fonction \textit{arima} pour les trois modèles à l'étude du logarithme du taux de change US/Euro. FINIR CE TABLEAU
+\textbf{Table III.} Tableau des valeurs estimées des différents coefficients obtenus de la fonction \textit{arima} pour les trois modèles à l'étude du logarithme du taux de change US/Euro.
+
+```{r fig1.8, eval=T, echo=F, fig.height=3.3}
+pacf(diff(log(ttaux)), main='', ylab='PACF')
+```
+\textbf{Figure 8.} 
 
 \newpage
 
