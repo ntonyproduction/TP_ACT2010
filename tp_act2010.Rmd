@@ -266,9 +266,11 @@ $$
 
 ```{r fig1.8, eval=T, echo=F, fig.height=5, fig.width=9}
 plot(rstandard(ttaux011), ylab='résidus standardisés', type='l', col='blue')
-#abline(rstandard(ttaux110), col='black')
+lines(rstandard(ttaux110), col='red')
+lines(rstandard(ttaux111), col='black')
+abline(h=0)
 ```
-\textbf{Figure 8.} 
+\textbf{Figure 8.} Superposition du graphique 
 
 \newpage
 
