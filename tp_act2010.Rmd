@@ -24,6 +24,7 @@ Le présent rapport se veut être l'analyse de différentes séries chronologiqu
 ```{r no1.1, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
 library('TSA')
 library('tseries')
+library('forcast')
 
 # Importation des données
 taux <- read.csv2("C:/Users/TEMP/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
@@ -138,15 +139,29 @@ ttaux111<-arima(log(ttaux), order=c(1,1,1), method='ML')
 #moyenne
 ttaux.log.mu<-mean(diff(log(ttaux)))
 
-#test des residus
-
+#test des residus (shapiro-wilk)
+ttaux011.sw<-shapiro.test(rstandard(ttaux011))
+ttaux110.sw<-shapiro.test(rstandard(ttaux110))
+ttaux111.sw<-shapiro.test(rstandard(ttaux111))
+#test de dependance des residus (run.test)
+ttaux110.rt<-runs(residuals(ttaux011))$pvalue
+ttaux011.rt<-runs(residuals(ttaux110))$pvalue
+ttaux111.rt<-runs(residuals(ttaux111))$pvalue
 ```
 On estime alors les valeurs des différents paramètres selon la méthode du maximum de vraisemblance à l'aide de la fonction $arima$. Les résultats se trouvent à la \textit{Table III}.
 \newline\newline
-On peut alors faire l'analyse de nos résidus pour faire notre choix parmi nos trois modèles. Les résidus de ces trois modèles sont tracés à la \textit{Figure 8}.
+On peut alors faire l'analyse de nos résidus pour faire notre choix parmi nos trois modèles. Les résidus standardisés de ces trois modèles sont tracés à la \textit{Figure 8}. On remarque d'abord que ces trois courbes se superposent et ne peuvent donc pas être utilisées pour sélecionner un modèle. De plus, on remarque de ce graphique que les valeurs de résidus supérieures à 2 en valeur absolue sont relativement fréquente ce qui pousse à questionner la théorie selon laquelle les résidus suivent une loi normale. En effet, dans le cas des résidus normaux, les valeurs supérieurs à 2 en valeur absolue devrait ce que matérialiser dans environ `r round(1-pnorm(2),4)*100`% des cas. La fréquence observée est nettement supérieur.
+\newline\newline
+On regarde ensuite les histogrammes et les graphiques QQ aux \textit{Table V} et \textit{Figure 9} des résidus. On remarque que les trois histogrammes semblent tracé avec efficacité la cloche de la loi normal. De plus, on remarque des trois graphiques QQ, que les résidus observés sont en tout point simiaire à leur valeurs théoriques en cas de normalité. Ces deux test semblent donc justifier la distribution normale des résidus de nos trois modèles.
+\newline\newline
+On effectue alors, pour tenter de départager nos modèles, un dernier test, soit le test de Shapiro-Wilk évaluant le dégré de corrélation entre les quantiles des résidus standardisés et la loi normale standard. L'hypothèse nulle étant que la distribution des résidus suit une loi normale, on confirme, avec des p-values respectivent de `r round(ttaux011.sw$p.value,4)`, `r round(ttaux110.sw$p.value,4)` et `r round(ttaux111.sw$p.value,4)`, que les résidus engendrés par les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) sont tous normalement distribués pour un test à un niveau de confiance $\alpha$ de 5%.
+\newline\newline
+On cherche également un modèle dont les résidus sont indépendants, sans quoi on ne retrouve pas un bruit blanc. On éffectue alors le run-test sur nos modèles pour tester l'indépendance entre eux des résidus. Comme l'hypothèse nulle est que les résidus sont indépendants, on conclut à un niveau de confiane de $\alpha=5$$ qu'ils le son bels et biens si la p-value est inférieur à 95%. On trouve alors, pour les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) des valeurs respectives de  ... pour les p-value de leur run-tests.
+\newline\newline
+On se trouve ainsi dans l'impossibilité de départager nos modèles à l'aide de l'étude de leurs résidus. On choisit alors de conserver le modèles IMA(1,1) parce qu'il est simple, parce que la valeur maximale de sa fonction de vraisemblance est la plus élevée et la valeur de AIC est la plus faible selon la \textit{Table III}. De plus, ce modèle nous permet de retrouver un modèle de loi lognormale pour modéliser le taux de US/Euro qui est un modèle fortement utilisé dans le monde de la mathématique financière.
 
 
-
+tsoutliers
 
 
 
@@ -249,16 +264,17 @@ plot(armasubsets(y=diff(log(ttaux)), nar=10, nma=1, y.name='test',ar.method='ols
 \textbf{Table II.} Tableau de la fonction BIC de la première différentiation du logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.
 
 $$
-\begin{tabular}{| l c | r |}
+\begin{tabular}{| l c |c|c| r |}
   \hline
-  Tests et tableaux & Modèles suggérés & res \\ \hline \hline
-  ARI(1,1) & $\mu$ & 0\\
-    & $\phi$ & $`r round(ttaux011$coef,4)`$\\ \hline
-  IMA(1,1) & $\mu$ & 0\\
-    & $\theta$ & $`r round(ttaux110$coef,4)`$\\ \hline
-  ARIMA(1,1,1) & $\mu$ & 0\\
-    & $\phi$ & `r round(ttaux111$coef[1],4)`\\
-    & $\theta$ & `r round(ttaux111$coef[2],4)`\\
+  Modèles & Paramètres & Valeurs estimés & AIC & Logarithme du max \\
+  & & & &  de vraisemblance \\ \hline \hline
+  IMA(1,1) & $\mu$ & 0 & $`r round(ttaux011$aic,0)`$ & $`r round(ttaux011$loglik,0)`$\\
+    & $\theta$ & $`r round(ttaux011$coef,4)`$&  &\\ \hline
+  ARI(1,1) & $\mu$ & 0& $`r round(ttaux110$aic,0)`$ &$`r round(ttaux110$loglik,0)`$\\
+    & $\phi$ & $`r round(ttaux110$coef,4)`$&  &\\ \hline
+  ARIMA(1,1,1) & $\mu$ & 0& $`r round(ttaux111$aic,0)`$ &$`r round(ttaux111$loglik,0)`$\\
+    & $\theta$ & `r round(ttaux111$coef[2],4)`&  &\\
+    & $\phi$ & `r round(ttaux111$coef[1],4)`&  &\\
   \hline
  \end{tabular}
 $$
@@ -270,7 +286,34 @@ lines(rstandard(ttaux110), col='red')
 lines(rstandard(ttaux111), col='black')
 abline(h=0)
 ```
-\textbf{Figure 8.} Superposition du graphique 
+\textbf{Figure 8.} Superposition des graphiques des résidus standardisés des modèles ARI(1,1), IMA(1,1) et ARIMA(1,1,1) du logarithme du taux de change US/Euro.
+
+```{r table1.4, eval=T, echo=F, fig.height=3.3, fig.width=2.3}
+hist(rstandard(ttaux011), xlab='',ylab='fréquence', main='IMA(1,1)')
+hist(rstandard(ttaux110), xlab='résidus standardisés',ylab='', main='ARI(1,1)')
+hist(rstandard(ttaux111), xlab='',ylab='', main='ARIMA(1,1,1)')
+```
+\textbf{Table IV.} Histogramme des résidus standardisés des modèles étuidés du logarithme du taux de change US/Euro.
+
+```{r fig1.9, eval=T, echo=F, fig.height=3.3, fig.width=2.3}
+qqnorm(rstandard(ttaux011), main='IMA(1,1)',ylab='Quantiles observés',xlab='',cex=0.2)
+qqnorm(rstandard(ttaux110),main='ARI(1,1)',xlab='Quantiles théoriques', ylab='',cex=0.2)
+qqnorm(rstandard(ttaux111),main='ARIMA(1,1,1)',xlab='', ylab='',cex=0.2)
+```
+\textbf{Figure 9.} Graphiques QQ des modèles étuidés du logarithme du taux de change US/Euro.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \newpage
 

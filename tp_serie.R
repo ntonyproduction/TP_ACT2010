@@ -184,7 +184,7 @@ tsdiag(ttaux011, gof=15, omit.initial=F)
 
 
 ###ARIMA(1,1,1)
-Box.test(residuals(ttaux111), lag=10, type="Ljung-Box", fitdf=1)
+Box.test(residuals(ttaux111), lag=10, type="Ljung-Box", fitdf=2)
 #selon cette p value, le modele est approprie
 tsdiag(ttaux111, gof=15, omit.initial=F)
 
