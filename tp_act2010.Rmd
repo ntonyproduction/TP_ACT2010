@@ -179,6 +179,7 @@ $$
 log Y_t = 1,2933\ log Y_{t-1} - 0.2933\ logY_{t-2} + e_t
 $$
 Pour l'ARIMA(0,1,3), le paramètre $\phi_1$ de notre AR(1) est de 0.2933, ce qui nous donne le modèle suivante:
+
 # voir chapitre 5 pour écrire le modèle
 
 
@@ -263,8 +264,9 @@ $$
 $$
 \textbf{Table III.} Tableau des valeurs estimées des différents coefficients obtenus de la fonction \textit{arima} pour les trois modèles à l'étude du logarithme du taux de change US/Euro.
 
-```{r fig1.8, eval=T, echo=F, fig.height=3.3}
-pacf(diff(log(ttaux)), main='', ylab='PACF')
+```{r fig1.8, eval=T, echo=F, fig.height=5, fig.width=9}
+plot(rstandard(ttaux011), ylab='résidus standardisés', type='l', col='blue')
+#abline(rstandard(ttaux110), col='black')
 ```
 \textbf{Figure 8.} 
 
