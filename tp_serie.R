@@ -12,8 +12,8 @@
 
 ######## importation et traitement primaire du jeu de donnees ###########
 #importation du jeu de donnees
-#taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
-taux <- read.csv2("C:/Users/TEMP/Desktop/tempo/TP_ACT2010/Taux_de_change_US_Euro.csv")
+#taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv") MY BAD J AI EFFACÉ TON REPORTERY
+taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
 rendement<-taux$US.Euro
 anne.mois<-taux$Année.mois
 #on transforme en time serie
@@ -21,7 +21,6 @@ ttaux<-ts(rendement,start=c(1999,1),end=c(2016,12),frequency = 12)
 
 ######### premiere analyse de la serie grace a son graphique et a sa fonction d'autocorrelation ##########
 #on trace le graphique
-win.graph(height=4,width=6)
 plot(ttaux,ylab='taux de change', type='o', xlab='année', main='Taux de change ')
 
 #on observe difficilement de stationnarité, 
@@ -210,7 +209,8 @@ arima(log(ttaux), order=c(0,1,2), method='ML')
 
 ######## importation et traitement primaire du jeu de donnees ###########
 #importation du jeu de donnees
-saaq <- read.csv2("C:/Users/TEMP/Desktop/tempo/TP_ACT2010/SAAQ-2015.csv")
+saaq <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/SAAQ-2015.csv")
+#saaq <- read.csv2("C:/Users/TEMP/Desktop/tempo/TP_ACT2010/SAAQ-2015.csv")
 #saaq <- read.csv2("C:/Users/Yanic/ulaval/Séries chronologiques/tp/SAAQ-2015.csv")
 naadc<-ts(saaq$NAADC,start=c(saaq$Année[1],1),end=c(saaq$Année[length(saaq$Année)],1), frequency=1)
 npa<-ts(saaq$NPA,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
@@ -228,7 +228,6 @@ cti<-ts(saaq$CTI,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
 
 ######### premiere analyse de la serie grace a son graphique et a sa fonction d'autocorrelation ##########
 #on trace le graphique
-win.graph(height=3.875,width=6, pointsize=8)
 plot(saaq$NAADC,ylab="nombres d'accidents",type='o')
 
 #on observe difficilement de stationnarité, 

@@ -14,7 +14,7 @@ lang: fr
 
 #Introduction au rapport
 
-Le présent rapport se veut être l'analyse de différentes séries chronologiques. Plus précisément, ce rapport a pour but de trouver le modèle qui s'ajuste le plus exactement à nos échantillons de données. Le travail en bref sera alors de séparer nos bases de données en un échantillons \textit{entraînement} qui servira à trouver un modèle et en un échantillon \textit{test} qui servira à valider la précision du modèle retenu. Le travail est fait à partir de deux bases de données pour un total de cinq variables à modéliser. La première base de données, traitée au numéro 1, contient les données mensuelles du taux de change du dollar américain par rapport à la monnaie Euro de janvier 1999 à décembre 2016. La seconde base de données contient une séries de statistiques de la \textit{SAAQ}, soit le nombre d'accidents automobiles avec dommages corporels, le nombre de personnes accidentés, le nombre de demandes d'indemnités et le coût total de lindemnisation (en dollar constants 2015) pour les années 1978 à 2015 inclusivement. Ces données seront traîtées au numéro 2. Afin d'alléger la lecture du présent rapport, les figures et tableaux furent placés en annexe.
+Le présent rapport se veut être l'analyse de différentes séries chronologiques. Plus précisément, il a pour but de trouver le modèle qui s'ajuste le plus exactement à nos échantillons de données. En bref, le travail consiste à séparer nos bases de données en un échantillon \textit{entraînement} qui sert à trouver un modèle et en un échantillon \textit{test} qui sert à valider la précision du modèle retenu. Le travail est fait à partir de deux bases de données pour un total de cinq variables à modéliser. La première base de données, traitée au numéro 1, contient les données mensuelles du taux de change du dollar américain par rapport à l'euro de janvier 1999 à décembre 2016. La seconde base de données contient une série de statistiques de la \textit{SAAQ}, soit le nombre d'accidents automobiles avec dommages corporels, le nombre de personnes accidentées, le nombre de demandes d'indemnités et le coût total de l'indemnisation (en dollar constant 2015) pour les années 1978 à 2015 inclusivement. Ces données seront traîtées au numéro 2. Afin d'alléger la lecture du présent rapport, les figures et les tableaux sont placés en annexe.
 
 \newpage
 
@@ -24,10 +24,10 @@ Le présent rapport se veut être l'analyse de différentes séries chronologiqu
 ```{r no1.1, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
 library('TSA')
 library('tseries')
-library('forcast')
+#library('forcast')
 
 # Importation des données
-taux <- read.csv2("C:/Users/TEMP/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
+taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
 rendement<-taux$US.Euro
 anne.mois<-taux$Année.mois
 
@@ -37,22 +37,22 @@ ttaux<-ts(rendement,start=c(1999,1),end=c(2016,12),frequency = 12)
 
 Tout d'abord, nous observons, à la \textit{Figure 1} en annexe, la série chronologique du taux de change américain/européen depuis janvier 1999 jusqu'à décembre 2016. Les données ont été collectées de façon quotidienne pour ensuite être transformées en taux mensuelles. 
 \newline\newline
-Grâce à une première analyse, on remarque sur le tableau de la fonction d'autocorrélation échantillonale qu'il y a une forte autocorrélation dans notre jeu de données et que celle-ci diminue lentement plus le lag augmente (voir \textit{Figure 2}). On soupçonne donc fortement ce processus d'être non-stationnaire. Il n'est pas nécessaire de tracer le graphique de la fonction d'autocorrélation partielle puisque on doit d'abord stationnarisé notre processus avant de réellement débuter son analyse.
+Grâce à une première analyse, on remarque sur le tableau de la fonction d'autocorrélation échantillonale qu'il y a une forte autocorrélation dans notre jeu de données et que celle-ci diminue lentement plus le lag augmente (voir \textit{Figure 2}). On soupçonne donc fortement ce processus d'être non-stationnaire. Il n'est pas nécessaire de tracer le graphique de la fonction d'autocorrélation partielle puisqu'on doit d'abord stationnariser notre processus avant de réellement débuter notre analyse.
 
 ##Test de stationnarité
 
 ```{r no1.2, echo=F}
 #test augmente de Dickey-Fuller
 #ar(ttaux)
-ttaux.adf<-adf.test(ttaux, k=ar(ttaux)$order)
+ttaux.adf <- adf.test(ttaux, k=ar(ttaux)$order)
 ```
-Le test de stationnarité de Dickey-Fuller est alors effectué sur notre base de données. On remarque que pour un ordre $k=2$ de processus auto-autoregressif tel que proposé par la fonction \textit{ar} de \textit{R}, notre processus est non stationnaire à un niveau de confiance de $5$% selon ce test avec une \textit{p-value} très forte de `r round(ttaux.adf$p.value,4)*100`%. On vérifie alors si une transformée Box-Cox est apppropriée à notre modèle avant de tester la stationnarité d'une première différentiation. 
+Le test de stationnarité de Dickey-Fuller est alors effectué sur notre base de données. On remarque que, pour un ordre $k=2$ de processus auto-autoregressif tel que proposé par la fonction \textit{ar} de \textit{R}, notre processus est non stationnaire à un niveau de confiance de $5$% avec une \textit{p-value} très forte de `r round(ttaux.adf$p.value,4)*100`%. On vérifie alors si une transformée Box-Cox est apppropriée à notre modèle avant de tester la stationnarité d'une première différentiation. 
 
 ##Transformation des données
 ```{r no1.3, echo=F,eval=F, warning=F}
 #valeurs du lambda Box-Cox
-boxcoxv<-BoxCox.ar(ttaux)$mle
-boxcoxic<-BoxCox.ar(ttaux)$ci
+boxcoxv <- BoxCox.ar(ttaux)$mle
+boxcoxic <- BoxCox.ar(ttaux)$ci
 ```
 
 Étant donné que les données sont positives, il est possible d'utiliser la transformée de Box-Cox afin de stabiliser notre processus. On rappelle que la famille des fonctions de puissance est définie de la façon suivante:
@@ -66,35 +66,35 @@ $$
 $\lambda$ est donc déterminé en maximisant la fonction de log-vraisemblance de nos données fournie à la \textit{Figure 3}.
 
 
-On constate que $\lambda = 0.1$ semble être l'estimé MLE situé au centre de l'intervalle de confiance 95%, soit $]-0.5, 0.7[$. Puisque $\lambda = 0$ est dans notre intervale de confiance, cette valeur du paramètre est également à considérer. Dans le cas ou le processus serait à différencier une seule fois, la transformation logarithmique est particuliairement attirante puisqu'elle permet de modéliser non pas le «prix» du taux de change, mais sont rendement comme il est usage de la faire dans le cas d'outils financiers. En effet, soit $Y_t$ le prix d'un outil financier au temps $t$,le modèle logarithmique modélise le rendement de la façon suivante.[^n1] SI ON GARDE PLUS LOIN LE MODELE ARIMA(0,1,1) CELA REVIENS AU MODELE LOGNORMALE (A MENTIONNER)
+On constate que $\lambda = 0.1$ semble être l'estimé MLE situé au centre de l'intervalle de confiance 95%, soit $]-0.5, 0.7[$. Puisque $\lambda = 0$ est dans notre intervale de confiance, cette valeur du paramètre est également à considérer. Dans le cas où le processus serait à différencier une seule fois, la transformation logarithmique est particuliairement intéressante puisqu'elle permet de modéliser non pas le «prix» du taux de change, mais sont rendement comme il est usage de le faire dans le cas d'outils financiers. En effet, soit $Y_t$ le prix d'un outil financier au temps $t$,le modèle logarithmique modélise le rendement de la façon suivante.[^n1] SI ON GARDE PLUS LOIN LE MODELE ARIMA(0,1,1) CELA REVIENS AU MODELE LOGNORMALE (A MENTIONNER)
 
 [^n1]: WEISHAUS, Abraham, SOA Exam MFE Models for Financial Economics 10th Edition.
 
 $$
 Y_t=Y_{t-1}e^{X}
 $$
-Où \textit{X}, le rendement continu mensuelle, est la variable aléatoire à modéliser. Ainsi, suite à une première différentiation de notre modèle logarithmique, on obtient direction ce rendement. Soit,
+où \textit{X}, le rendement continu mensuel, est la variable aléatoire à modéliser. Ainsi, suite à une première différentiation de notre modèle logarithmique, on obtient direction ce rendement. Soit,
 $$
 log\left(\frac{Y_t}{Y_{t-1}}\right)=X
 $$
-On conservera alors cette transformation à condition que la première différentiation de notre processus soit stationnaire. Le graphique de cette transformation est affiché à la \textit{Figure 4}.
+On conserve alors cette transformation à condition que la première différenciation de notre processus soit stationnaire. Le graphique de cette transformation est affiché à la \textit{Figure 4}.
 \newline\newline
 ```{r no1.4, echo=F, warning=F}
 #ar(diff(log(ttaux)))
-ttaux.log.adf<-adf.test(diff(log(ttaux)), k=ar(diff(log(ttaux)))$order)
+ttaux.log.adf <- adf.test(diff(log(ttaux)), k=ar(diff(log(ttaux)))$order)
 ```
 
-On effectue alors à nouveau , suite à une première différentiation, le test augmenté de Dickey-Fuller. On remarque cette fois qu'avec un processus autorégressif d'ordre 1 tel que suggéré par la fonction $ar$, on ne peut rejetter l'hypothèse de stationnarité avec un p-value inférieur à `r round(ttaux.log.adf$p.value,4)*100`%. Ainsi, tel que mentionnée précédement, la transformation logarithmique sera concervée. Le graphique de la première différentiation du logarithme de la série chronologique à l'étude se trouve à la \textit{Figure 5}.
+Suite à une première différenciation, on effectue à nouveau le test augmenté de Dickey-Fuller. On remarque cette fois que, avec un processus autorégressif d'ordre 1 tel que suggéré par la fonction $ar$, on ne peut rejetter l'hypothèse de stationnarité avec un p-value inférieur à `r round(ttaux.log.adf$p.value,4)*100`%. Ainsi, tel que mentionné précédement, la transformation logarithmique est conservée. Le graphique de la première différenciation du logarithme de la série chronologique à l'étude se trouve à la \textit{Figure 5}.
 
 ## Identification du modèle
 
-Maintenant que la série est stationnaire, on peut en identifier le modèle. La première différentiation du logarithme du taux de change US/Euro sera dorénevent notre modèle de base. On fera ainsi référence à ce modèle par défaut. 
+Maintenant que la série est stationnaire, on peut en identifier le modèle. La première différenciation du logarithme du taux de change US/Euro est dorénavent notre modèle de base. On fera ainsi référence à ce modèle par défaut. 
 \newline\newline
-On observe les fonctions d'autocorrélation et d'autocorrélation affichées aux \textit{Figure 6} et \textit{Figure 7} de la série à l'étude. On remarque que la fonction d'autocorrélation suggère fortement un modèle à moyenne mobile d'ordre 1, soit IMA(1,1) pour notre modèle tansformé alors que la fonction d'autocorrélation partielle suggère un modèle autorégressif d'ordre 1, soit ARI(1,1). On testera alors également le modèle ARIMA(1,1,1) qui est suggérer par la combinaison de ces graphiques.
+On observe les fonctions d'autocorrélation et d'autocorrélation partielle affichées aux \textit{Figure 6} et \textit{Figure 7} de cette série. On remarque que la fonction d'autocorrélation suggère fortement un modèle à moyenne mobile d'ordre 1, soit IMA(1,1) pour notre modèle tansformé alors que la fonction d'autocorrélation partielle suggère un modèle autorégressif d'ordre 1, soit ARI(1,1). On testera alors également le modèle ARIMA(1,1,1) qui est suggéré par la combinaison de ces graphiques.
 \newline\newline
-On observe ensuite la fonction d'autocorrélation étendue afin de voir si ce test à un autre modèle à proposer. Le tableau de la fonction EACF est à la \textit{Table I}. On observe d'abord de ce tableau que le modèle IMA(1,1) est suggéré pour la différentiation de notre modèle transformé initial. On peut également chercher à savoir si la valeur du $o$ en ARMA(0,1) et du $x$ en ARMA(1,1) sont significativement différent de leur valeurs inverses ($x$ pour le $o$ et vice versa), sans quoi le modèle ARIMA(1,1,1) serait également suggeré par le tableau EACF. Cependant, comme il fut déjà décidé d'évaluer la pertinance du modèle ARIMA(1,1,1) suite à l'analyse des fonction d'autocorrélation et d'autocorrélation partielle, il n'est pas nécessaire de test la pertiance de ce modèle selon le EACF.
+On observe ensuite la fonction d'autocorrélation étendue afin de voir si ce test à un autre modèle à proposer. Le tableau de la fonction EACF est à la \textit{Table I}. On observe d'abord de ce tableau que le modèle IMA(1,1) est suggéré pour la différenciation de notre modèle transformé initial. On peut également chercher à savoir si la valeur du $o$ en ARMA(0,1) et du $x$ en ARMA(1,1) sont significativement différent de leur valeurs inverses ($x$ pour le $o$ et vice versa), sans quoi le modèle ARIMA(1,1,1) serait également suggeré par le tableau EACF. Cependant, comme il fut déjà décidé d'évaluer la pertinance du modèle ARIMA(1,1,1) suite à l'analyse des fonction d'autocorrélation et d'autocorrélation partielle, il n'est pas nécessaire de test la pertiance de ce modèle selon le EACF.
 \newline\newline
-Le dernier test effectué pour ajuster un modèle à notre série chronologique est le test du BIC. Le tableau du BIC est tracé à la \textit{Table II} propose un modèle ARI(1,1). L'ordre maximal de moyenne mobile pour ce test a été établi à 1, sans quoi la fonction \textit{armasubsets} permettant de tracer le tableau du BIC retourne des avertissements de forte dépendance linéaire entre les paramètres. On étudiera ainsi les quatre tests proposés par les tests précédents qui peuvent être résumé de la façon suivante;
+Le dernier test effectué pour ajuster un modèle à notre série chronologique est le test du BIC. Le tableau du BIC est tracé à la \textit{Table II} propose un modèle ARI(1,1). L'ordre maximal de moyenne mobile pour ce test a été établi à 1, sans quoi la fonction \textit{armasubsets} permettant de tracer le tableau du BIC retourne des avertissements de forte dépendance linéaire entre les paramètres. On étudiera ainsi les quatre modèles proposés par les tests précédents qui peuvent être résumé de la façon suivante;
 
 $$
 \begin{tabular}{| l | r |}
@@ -121,91 +121,52 @@ W_t -\mu&= e_t-\theta e_{t-1} \qquad \qquad \qquad &(2)\\
 W_t- \mu&= \phi (W_{t-1}-\mu) + e_t-\theta e_{t-1} \qquad \qquad \qquad &(3)\\
 \end{aligned}
 $$
-Où
+où
 $$
 W_t=\nabla log(Y_t)
 $$
-Et $e_t$ est un bruit blanc et $\mu$ la moyenne de la série chronologique non-centrée. Il est ici important de noter que les paramètres estimés $\hat{\theta}$ et $\hat{\phi}$ ne seront pas les mêmes dans les trois modèles et devront donc être estimés pour chacun d'entre eux.
+et $e_t$ est un bruit blanc et $\mu$ la moyenne de la série chronologique non-centrée. Il est ici important de noter que les paramètres estimés $\hat{\theta}$ et $\hat{\phi}$ ne seront pas les mêmes dans les trois modèles et devront donc être estimés pour chacun d'entre eux.
 
-##Estimation des paramètres des différents modèles et test de résidus
+##Estimation des paramètres des différents modèles et tests de résidus
 
 ```{r no1.5, echo=F}
 #IMA(1,1)
-ttaux011<-arima(log(ttaux), order=c(0,1,1), method='ML')
+ttaux011 <- arima(log(ttaux), order=c(0,1,1), method='ML')
 #ARI(1,1)
-ttaux110<-arima(log(ttaux), order=c(1,1,0), method='ML')
+ttaux110 <- arima(log(ttaux), order=c(1,1,0), method='ML')
 #ARIMA(1,1,1)
-ttaux111<-arima(log(ttaux), order=c(1,1,1), method='ML')
+ttaux111 <- arima(log(ttaux), order=c(1,1,1), method='ML')
 #moyenne
-ttaux.log.mu<-mean(diff(log(ttaux)))
+ttaux.log.mu <- mean(diff(log(ttaux)))
 
 #test des residus (shapiro-wilk)
-ttaux011.sw<-shapiro.test(rstandard(ttaux011))
-ttaux110.sw<-shapiro.test(rstandard(ttaux110))
-ttaux111.sw<-shapiro.test(rstandard(ttaux111))
+ttaux011.sw <- shapiro.test(rstandard(ttaux011))
+ttaux110.sw <- shapiro.test(rstandard(ttaux110))
+ttaux111.sw <- shapiro.test(rstandard(ttaux111))
 #test de dependance des residus (run.test)
-ttaux110.rt<-runs(residuals(ttaux011))$pvalue
-ttaux011.rt<-runs(residuals(ttaux110))$pvalue
-ttaux111.rt<-runs(residuals(ttaux111))$pvalue
+ttaux110.rt <- runs(residuals(ttaux011))$pvalue
+ttaux011.rt <- runs(residuals(ttaux110))$pvalue
+ttaux111.rt <- runs(residuals(ttaux111))$pvalue
 ```
 On estime alors les valeurs des différents paramètres selon la méthode du maximum de vraisemblance à l'aide de la fonction $arima$. Les résultats se trouvent à la \textit{Table III}.
 \newline\newline
-On peut alors faire l'analyse de nos résidus pour faire notre choix parmi nos trois modèles. Les résidus standardisés de ces trois modèles sont tracés à la \textit{Figure 8}. On remarque d'abord que ces trois courbes se superposent et ne peuvent donc pas être utilisées pour sélecionner un modèle. De plus, on remarque de ce graphique que les valeurs de résidus supérieures à 2 en valeur absolue sont relativement fréquente ce qui pousse à questionner la théorie selon laquelle les résidus suivent une loi normale. En effet, dans le cas des résidus normaux, les valeurs supérieurs à 2 en valeur absolue devrait ce que matérialiser dans environ `r round(1-pnorm(2),4)*100`% des cas. La fréquence observée est nettement supérieur.
+On peut alors faire l'analyse de nos résidus pour faire notre choix parmi nos trois modèles. Les résidus standardisés de ces trois modèles sont tracés à la \textit{Figure 8}. On remarque d'abord que ces trois courbes se superposent et ne peuvent donc pas être utilisées pour sélectionner un modèle. De plus, on remarque de ce graphique que les valeurs de résidus supérieures à 2 en valeur absolue sont relativement fréquentes ce qui nous poussent à questionner la théorie selon laquelle les résidus suivent une loi normale. En effet, dans le cas des résidus normaux, les valeurs supérieurs à 2 en valeur absolue devrait ce que matérialiser dans environ `r round(1-pnorm(2),4)*100`% des cas. La fréquence observée est nettement supérieur.
 \newline\newline
-On regarde ensuite les histogrammes et les graphiques QQ aux \textit{Table V} et \textit{Figure 9} des résidus. On remarque que les trois histogrammes semblent tracé avec efficacité la cloche de la loi normal. De plus, on remarque des trois graphiques QQ, que les résidus observés sont en tout point simiaire à leur valeurs théoriques en cas de normalité. Ces deux test semblent donc justifier la distribution normale des résidus de nos trois modèles.
+On regarde ensuite les histogrammes et les graphiques QQ aux \textit{Table IV} et \textit{Figure 9} des résidus. On remarque que les trois histogrammes semblent tracer avec efficacité la cloche de la loi normal. De plus, on remarque des trois graphiques QQ, que les résidus observés sont en tout point simiaire à leur valeur théorique en cas de normalité. Ces deux test semblent donc justifier la distribution normale des résidus de nos trois modèles.
 \newline\newline
-On effectue alors, pour tenter de départager nos modèles, un dernier test, soit le test de Shapiro-Wilk évaluant le dégré de corrélation entre les quantiles des résidus standardisés et la loi normale standard. L'hypothèse nulle étant que la distribution des résidus suit une loi normale, on confirme, avec des p-values respectivent de `r round(ttaux011.sw$p.value,4)`, `r round(ttaux110.sw$p.value,4)` et `r round(ttaux111.sw$p.value,4)`, que les résidus engendrés par les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) sont tous normalement distribués pour un test à un niveau de confiance $\alpha$ de 5%.
+On effectue alors, pour tenter de départager nos modèles, un dernier test, soit le test de Shapiro-Wilk évaluant le dégré de corrélation entre les quantiles des résidus standardisés et la loi normale standard. L'hypothèse nulle étant que la distribution des résidus suit une loi normale, on confirme, avec des p-values respectives de `r round(ttaux011.sw$p.value,4)`, `r round(ttaux110.sw$p.value,4)` et `r round(ttaux111.sw$p.value,4)`, que les résidus engendrés par les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) sont tous normalement distribués pour un test à un niveau de confiance $\alpha$ de 5%.
 \newline\newline
-On cherche également un modèle dont les résidus sont indépendants, sans quoi on ne retrouve pas un bruit blanc. On éffectue alors le run-test sur nos modèles pour tester l'indépendance entre eux des résidus. Comme l'hypothèse nulle est que les résidus sont indépendants, on conclut à un niveau de confiane de $\alpha=5$$ qu'ils le son bels et biens si la p-value est inférieur à 95%. On trouve alors, pour les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) des valeurs respectives de  ... pour les p-value de leur run-tests.
+On cherche également un modèle dont les résidus sont indépendants, sans quoi on ne retrouve pas un bruit blanc. On effectue alors le run-test sur nos modèles pour tester l'indépendance entre les résidus. Comme l'hypothèse nulle est que les résidus sont indépendants, on conclut à un niveau de confiane de $\alpha=5$ qu'ils le sont bels et biens si la p-value est inférieur à 95% **(C EST PAS SUPPOSÉ ETRE SI C EST SUPERIEUR A 5%?)**. On trouve alors, pour les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) des valeurs respectives de `r round(ttaux011.rt,4)`, `r round(ttaux110.rt,4)` et `r round(ttaux111.rt,4)` pour les p-value de leur run-tests.
 \newline\newline
-On se trouve ainsi dans l'impossibilité de départager nos modèles à l'aide de l'étude de leurs résidus. On choisit alors de conserver le modèles IMA(1,1) parce qu'il est simple, parce que la valeur maximale de sa fonction de vraisemblance est la plus élevée et la valeur de AIC est la plus faible selon la \textit{Table III}. De plus, ce modèle nous permet de retrouver un modèle de loi lognormale pour modéliser le taux de US/Euro qui est un modèle fortement utilisé dans le monde de la mathématique financière.
+On se trouve ainsi dans l'impossibilité de départager nos modèles à l'aide de l'étude de leurs résidus. On choisit alors de conserver le modèle IMA(1,1) parce qu'il est simple, parce que la valeur maximale de sa fonction de vraisemblance est la plus élevée et parce que la valeur du test AIC est la plus faible selon la \textit{Table III}. De plus, ce modèle nous permet de retrouver un modèle de loi lognormale pour modéliser le taux de US/Euro qui est un modèle fortement utilisé dans le monde de la mathématique financière.
 
 
 tsoutliers
 
 
+parler de la surparamétrisation. je n'ai pas fait les prévisions du test pcq je veux voir quel modele on prend.
 
-
-
-
-
-
-
-
-
-## f)
-Par la suite, il faut estimer les paramètres de chacun des modèles énumérés en (e) par la méthode du maximum de vraisemblance (MLE).
-
-```{r MLE_ARIMA011, eval=T, echo=F}
-ttaux011 <- arima(log(ttaux), order=c(0,1,1), method='ML')
-```
-
-Pour l'ARIMA(0,1,1), le paramètre $\theta_1$ de notre MA(1) est de 0.3118, ce qui nous donne le modèle suivant:
-$$
-log Y_t = log Y_{t-1} + e_t + 0.3118e_{t-1}
-$$
-```{r MLE_ARIMA110, eval=T, echo=F}
-ttaux110 <- arima(log(ttaux), order=c(1,1,0), method='ML')
-```
-
-Pour l'ARIMA(1,1,0), le paramètre $\phi_1$ de notre AR(1) est de 0.2933, ce qui nous donne le modèle suivante:
-
-$$
-log Y_t = 1,2933\ log Y_{t-1} - 0.2933\ logY_{t-2} + e_t
-$$
-Pour l'ARIMA(0,1,3), le paramètre $\phi_1$ de notre AR(1) est de 0.2933, ce qui nous donne le modèle suivante:
-
-# voir chapitre 5 pour écrire le modèle
-
-
-
-
-
-
-
-
-
-
+#SAAQ
 
 
 
@@ -301,33 +262,3 @@ qqnorm(rstandard(ttaux110),main='ARI(1,1)',xlab='Quantiles théoriques', ylab=''
 qqnorm(rstandard(ttaux111),main='ARIMA(1,1,1)',xlab='', ylab='',cex=0.2)
 ```
 \textbf{Figure 9.} Graphiques QQ des modèles étuidés du logarithme du taux de change US/Euro.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\newpage
-
-## Code informatique
-
-```{r ref1.1, ref.label="no1.1", echo=TRUE, eval=FALSE}
-
-```
-```{r ADF, eval=F, echo=T}
-# Test augmenté de Dickey-Fuller (ADF)
-ar(log(ttaux))
-adf.test(log(ttaux), k=2)
-```
-```{r ref2, ref.label="MLE_ARIMA011", eval=F, echo=T}
-
-```
-
