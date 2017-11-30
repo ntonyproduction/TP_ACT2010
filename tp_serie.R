@@ -13,7 +13,7 @@ library("tsoutliers")
 
 ######## importation et traitement primaire du jeu de donnees ###########
 #importation du jeu de donnees
-#taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv") MY BAD J AI EFFACÉ TON REPORTERY
+#taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv") MY BAD J AI EFFACÉ TON DIRECTORY
 taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
 rendement<-taux$US.Euro
 anne.mois<-taux$Année.mois
@@ -205,7 +205,7 @@ arima(log(ttaux), order=c(0,1,2), method='ML')
 
 
 #################################################
-#                 QUESTION 2                     #
+#                 QUESTION 2                    #
 #################################################
 
 ######## importation et traitement primaire du jeu de donnees ###########
@@ -213,10 +213,10 @@ arima(log(ttaux), order=c(0,1,2), method='ML')
 saaq <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/SAAQ-2015.csv")
 #saaq <- read.csv2("C:/Users/TEMP/Desktop/tempo/TP_ACT2010/SAAQ-2015.csv")
 #saaq <- read.csv2("C:/Users/Yanic/ulaval/Séries chronologiques/tp/SAAQ-2015.csv")
-naadc<-ts(saaq$NAADC,start=c(saaq$Année[1],1),end=c(saaq$Année[length(saaq$Année)],1), frequency=1)
-npa<-ts(saaq$NPA,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
-ndi<-ts(saaq$NDI,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
-cti<-ts(saaq$CTI,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
+naadc <- ts(saaq$NAADC,start=c(saaq$Année[1],1),end=c(saaq$Année[length(saaq$Année)],1), frequency=1)
+npa <- ts(saaq$NPA,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
+ndi <- ts(saaq$NDI,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
+cti <- ts(saaq$CTI,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
 
 #NAADC : Nombre d'accidents avec dommages corporels
 #NPA : Nombre de personnes accidentées
@@ -331,19 +331,41 @@ abline(h=0)
 #################################################
 # graphique des données du NPA
 plot(npa, ylab = "Nombre de personnes accidentées", type = "o")
-plot(log(npa), ylab = "Nombre de personnes accidentées", type = "o") # logarithme des données
 
 # On regarde si on est en présence de données aberrantes
 tso(npa) # le test nous propose de retirer l'année 1982
 tso(log(npa)) # le test nous propose de retirer les années 1979, 1982 et 1985.
 
 # en retirant les données aberrantes du log, on recommence les procédures
-plot(log(npa[c(-2, -5, -8)]), ylab = "Nombre de personnes accidentées", type = "o")
+plot(npa[-5], ylab = "Nombre de personnes accidentées", type = "o")
+
+# Box Cox sur données d'origines moins la/les données aberrantes
+BoxCox.ar(npa[-5])
+BoxCox.ar(npa[-5])$mle
+BoxCox.ar(npa[-5])$ci # on a que le 0 est PRATIQUEMENT inclus dans les bornes pour la valeur de lambda, fak on fait le log
+
+# tracer le log des données (toujours moins les données aberrantes)
+plot(log(npa[-5]), ylab = "Nombre de personnes accidentées", type = "o") # ne semble pas avoir de stationnarité
+
+# On effectue une première différenciation
+plot(diff(log(npa[-5])), type='o', ylab='différencitation du logarithme')
 
 # graphiques ACF et PACF
-acf(log(npa[c(-2, -5, -8)]), main='autocorrélation NPA') # diminue rapidement signe de stationnarité, propose une MA(4) avec partie AR
-pacf(log(npa[c(-2, -5, -8)]), main='autocorrélation NPA') # propose une AR(1)
+acf(log(npa[-5]), main='autocorrélation NPA') # diminue rapidement signe de stationnarité, propose une MA(5) avec partie AR
+pacf(log(npa[-5]), main='autocorrélation NPA') # propose une AR(1)
 
+# On confirme la stationnarité avec le test DF
+ar(log(npa[-5])) #R suggere d'utiliser k=2
+adf.test(log(npa[-5]), k=2) #suggere la non stationnarite avec une p value de 60%
+
+#on tente une premiere differenciation
+ar(diff(log(npa[-5]))) #R suggere k=0
+adf.test(diff(log(npa[-5])),k=0) #suggere la non stationnarite avec une p value de 1%
+
+# graphiques ACF et PACF de la diff du log
+acf(diff(log(npa[-5])), main='autocorrélation NPA')
+pacf(diff(log(npa[-5])), main='autocorrélation NPA')
+eacf(diff(log(npa[-5])))
 
 #################################################
 #                    NDI                        #
