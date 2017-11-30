@@ -161,10 +161,14 @@ On cherche également un modèle dont les résidus sont indépendants, sans quoi
 On se trouve ainsi dans l'impossibilité de départager nos modèles à l'aide de l'étude de leurs résidus. On choisit alors de conserver le modèle IMA(1,1) parce qu'il est simple, parce que la valeur maximale de sa fonction de vraisemblance est la plus élevée et parce que la valeur du test AIC est la plus faible selon la \textit{Table III}. De plus, ce modèle nous permet de retrouver un modèle de loi lognormale pour modéliser le taux de US/Euro qui est un modèle fortement utilisé dans le monde de la mathématique financière.
 
 
-tsoutliers
+tsoutliers = TA BESOIN DE DOWNLOADER LE PACKAGE TSOUTLIERS pour retirer les données aberrantes avec la fonction "tso"
 
 
 parler de la surparamétrisation. je n'ai pas fait les prévisions du test pcq je veux voir quel modele on prend.
+
+pi les tests de Dickey Fuller, c'est stationnaire quand c est en bas de 5% pour la p-value et non stationnaire dans le cas contraire.
+
+
 
 #SAAQ
 

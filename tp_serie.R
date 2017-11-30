@@ -1,5 +1,6 @@
-#library('TSA')
-#library('tseries')
+library('TSA')
+library('tseries')
+library("tsoutliers")
 
 #################################################
 #           TP1 SERIE CHRONO                    #
@@ -58,7 +59,7 @@ pacf(log(ttaux))
 ar(log(ttaux))
 #R suggere d'utiliser k=2
 adf.test(log(ttaux), k=2)
-#suggere la non stationnarite avec une p value de 93% (tres pres detre stationnaire)
+#suggere la non stationnarite avec une p value de 93% (tres pres detre stationnaire) #EDIT: FAUX, ça serait prêt si c'était proche de 5%.
 #on tente une premiere differenciation
 ar(diff(log(ttaux)))
 #R suggere k=1
@@ -218,17 +219,17 @@ ndi<-ts(saaq$NDI,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
 cti<-ts(saaq$CTI,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
 
 #NAADC : Nombre d'accidents avec dommages corporels
-#NPA : Nombre de personnes accidentés
+#NPA : Nombre de personnes accidentées
 #NDI : Nombre de demandes d'indemnités
 #CTI : Coût total de l'indemnisation (en millions de dollars, et en dollars constants 2015)
 
 #################################################
-#                 NAADC                        #
+#                  NAADC                        #
 #################################################
 
 ######### premiere analyse de la serie grace a son graphique et a sa fonction d'autocorrelation ##########
 #on trace le graphique
-plot(saaq$NAADC,ylab="nombres d'accidents",type='o')
+plot(saaq$NAADC,ylab="nombres d'accidents avec dommages corporels",type='o')
 
 #on observe difficilement de stationnarité, 
 #L'autocorrelation décroisse rapidement signe de stationnarité 
@@ -262,14 +263,14 @@ pacf(naadc^(-2))
 ar(naadc^(-2))
 #R suggere d'utiliser k=2
 adf.test(naadc^(-2), k=2)
-#suggere la stationnarite avec p value de 48%
+#suggere la non-stationnarite avec p value de 48%
 
 ##naadc^(1)
 #on trouve d'abord la valeur de l'ordre AR(k) suggere par R
 ar(naadc)
 #R suggere d'utiliser k=2
 adf.test(naadc, k=2)
-#suggere la stationnarite avec p value de 25%
+#suggere la non-stationnarite avec p value de 25%
 
 
 ######## on cherche le modele de notre serie maintenant stationnaire ############
@@ -324,3 +325,58 @@ plot(rstandard(naadc2001), ylab='résidus standardisés', type='o')
 abline(h=0)
 #distance superieur a 3 pour 
 1-pnorm(2) #prob d'avoir un res superieur ou inferieur a 2
+
+#################################################
+#                    NPA                        #
+#################################################
+# graphique des données du NPA
+plot(npa, ylab = "Nombre de personnes accidentées", type = "o")
+plot(log(npa), ylab = "Nombre de personnes accidentées", type = "o") # logarithme des données
+
+# On regarde si on est en présence de données aberrantes
+tso(npa) # le test nous propose de retirer l'année 1982
+tso(log(npa)) # le test nous propose de retirer les années 1979, 1982 et 1985.
+
+# en retirant les données aberrantes du log, on recommence les procédures
+plot(log(npa[c(-2, -5, -8)]), ylab = "Nombre de personnes accidentées", type = "o")
+
+# graphiques ACF et PACF
+acf(log(npa[c(-2, -5, -8)]), main='autocorrélation NPA') # diminue rapidement signe de stationnarité, propose une MA(4) avec partie AR
+pacf(log(npa[c(-2, -5, -8)]), main='autocorrélation NPA') # propose une AR(1)
+
+
+#################################################
+#                    NDI                        #
+#################################################
+# graphique des données du NPA
+plot(ndi, ylab = "Nombre de demandes d'indemnités", type = "o")
+plot(log(ndi), ylab = "Nombre de demandes d'indemnités", type = "o") # logarithme des données
+
+# On regarde si on est en présence de données aberrantes
+tso(ndi) # le test nous propose de retirer l'année 1982
+tso(log(ndi)) # le test nous propose de retirer l'année 1982
+
+# en retirant les données aberrantes du log, on recommence les procédures
+plot(log(ndi[-5]), ylab = "Nombre de personnes accidentées", type = "o")
+
+# graphiques ACF et PACF
+acf(log(ndi[-5]), main='autocorrélation NPA') # diminue rapidement signe de stationnarité, propose une MA(3), probablement avec une partie AR
+pacf(log(ndi[-5]), main='autocorrélation NPA') # propose une AR(2)
+
+#################################################
+#                    CTI                        #
+#################################################
+# graphique des données du NPA
+plot(cti, ylab = "Coût total de l'indemnisation", type = "o")
+plot(log(cti), ylab = "Coût total de l'indemnisation", type = "o") # logarithme des données
+
+# On regarde si on est en présence de données aberrantes
+tso(cti) # le test nous propose de retirer aucune donnée
+tso(log(cti)) # le test nous propose de retirer l'année 1982
+
+# en retirant les données aberrantes du log, on recommence les procédures
+plot(log(cti[-5]), ylab = "Nombre de personnes accidentées", type = "o")
+
+# graphiques ACF et PACF
+acf(log(cti[-5]), main='autocorrélation NPA') # diminue rapidement signe de stationnarité, propose une MA(5), probablement avec une partie AR
+pacf(log(cti[-5]), main='autocorrélation NPA') # propose une AR(1)
