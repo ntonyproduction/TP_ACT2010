@@ -125,13 +125,13 @@ W_t- \mu&= \phi (W_{t-1}-\mu) + e_t-\theta e_{t-1} \qquad \qquad \qquad &(3)\\
 $$
 où
 $$
-W_t=\nabla log(Y_t)
+W_t=\nabla \text{ln}(Y_t)
 $$
 et $e_t$ est un bruit blanc et $\mu$ la moyenne de la série chronologique non-centrée. Il est ici important de noter que les paramètres estimés $\hat{\theta}$ et $\hat{\phi}$ ne seront pas les mêmes dans les trois modèles et devront donc être estimés pour chacun d'entre eux.
 
 ##Estimation des paramètres des différents modèles et tests de résidus
 
-```{r no1.5, echo=F}
+```{r no1.5, echo=F, warning=F}
 #IMA(1,1)
 ttaux011 <- arima(log(ttaux), order=c(0,1,1), method='ML')
 #ARI(1,1)
@@ -151,6 +151,10 @@ ttaux011.rt <- runs(residuals(ttaux110))$pvalue
 ttaux111.rt <- runs(residuals(ttaux111))$pvalue
 #test de Ljung-Box
 ttaux011.lb <- Box.test(residuals(ttaux011), lag= 10, type='Ljung-Box', fitdf=1)
+ttaux011.lb <- Box.test(residuals(ttaux110), lag= 10, type='Ljung-Box', fitdf=1)
+ttaux111.lb <- Box.test(residuals(ttaux111), lag= 10, type='Ljung-Box', fitdf=1)
+#overfiting
+ttaux012<-arima(log(ttaux), order=c(0,1,2), method='ML')
 ```
 On estime alors les valeurs des différents paramètres selon la méthode du maximum de vraisemblance à l'aide de la fonction $arima$. Les résultats se trouvent à la \textit{Table III}.
 \newline\newline
@@ -166,14 +170,19 @@ On effectue un dernier test sur nos modèles afin de les départager. Le test de
 \newline\newline
 On se trouve ainsi dans l'impossibilité de départager nos modèles à l'aide de l'étude de leurs résidus en plus de voir tous ces modèles être jugés appropriés selon le test de Ljung-Box. On choisit alors de conserver le modèle IMA(1,1) parce qu'il est simple, parce que la valeur maximale de sa fonction de vraisemblance est la plus élevée et parce que la valeur du test AIC est la plus faible selon la \textit{Table III}. De plus, ce modèle nous permet de retrouver un modèle de loi lognormale pour modéliser le taux US/Euro qui est un modèle fortement utilisé dans le monde de la mathématique financière.
 \newline\newline
-On regarde, pour finaliser le choix de modèle, la question de l'\textit{overfiting}.
+On regarde, pour finaliser le choix de modèle, la question de l'\textit{overfiting}. Comme le modèle ARIMA(1,1,1) a déjà été testé, il suffit ici d'obeserver le comportement du modèle IMA(1,2). On remarque de la \textit{Table III} que le paramètre $\theta_1$ du modèle IMA(1,2) est très près du paramètre $\theta$ du modèle IMA(1,1) en plus d'avoir un paramètre $\theta_2$ avoisinant 0. On peut alors écarter ce modèle. Le modèle IMA(1,1) est donc celui avec lequel les prédictions seront effectuées. 
 
-tsoutliers = TA BESOIN DE DOWNLOADER LE PACKAGE TSOUTLIERS pour retirer les données aberrantes avec la fonction "tso"
+##Prédictions
+```{r no1.6, echo=F}
+ttaux011.pred<-predict(ttaux011, n.ahead=12)
+```
 
+On peut alors effectuer les prédictions des taux de changes US/Euro des mois de l'année 2017 grâce au modèle suivant.
 
-parler de la surparamétrisation. je n'ai pas fait les prévisions du test pcq je veux voir quel modele on prend.
+$$
+\nabla \text{ln} (Y_t)=e_t-`r round(ttaux011$coef,4)` e_{t-1}
+$$
 
-pi les tests de Dickey Fuller, c'est stationnaire quand c est en bas de 5% pour la p-value et non stationnaire dans le cas contraire.
 
 
 
@@ -207,7 +216,7 @@ BoxCox.ar(ttaux)
 plot(log(ttaux), type='o',xlab="Année", ylab='Valeur du logarithme', cex=0.5)
 abline(h=0)
 ```
-\textbf{Figure 4.} Logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.
+\textbf{Figure 4.} Logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2016.
 
 ```{r fig1.5, eval=T, echo=F, fig.height=3.3}
 plot(diff(log(ttaux)), type='o',xlab="Année", ylab='Différentiation du logarithme', cex=0.5)
@@ -288,3 +297,8 @@ tsdiag(ttaux110, gof=15, omit.inital=F)
 tsdiag(ttaux111, gof=15, omit.inital=F)
 ```
 \textbf{Figure 12.} Graphiques des résidus standardisés, de l'autocorrélation des résidus et des p-values du test de Ljung-Box du modèle ARIMA(1,1,1) pour le logarithme du taux de change US/Euro.
+
+```{r fig1.13, eval=T, echo=F, fig.height=5, warning=F}
+plot(ttaux011, n.ahead=12, ylab='Valeur du logarithme', xlab='Années')
+```
+\textbf{Figure 13.} Logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2016 avec prédictions pour l'année 2017.
