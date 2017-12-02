@@ -24,10 +24,12 @@ Le présent rapport se veut être l'analyse de différentes séries chronologiqu
 ```{r no1.1, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
 library('TSA')
 library('tseries')
+#library('stats')
 #library('forcast')
 
 # Importation des données
-taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
+#taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
+taux <- read.csv2("C:/Users/TEMP/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
 rendement<-taux$US.Euro
 anne.mois<-taux$Année.mois
 
@@ -147,6 +149,8 @@ ttaux111.sw <- shapiro.test(rstandard(ttaux111))
 ttaux110.rt <- runs(residuals(ttaux011))$pvalue
 ttaux011.rt <- runs(residuals(ttaux110))$pvalue
 ttaux111.rt <- runs(residuals(ttaux111))$pvalue
+#test de Ljung-Box
+ttaux011.lb <- Box.test(residuals(ttaux011), lag= 10, type='Ljung-Box', fitdf=1)
 ```
 On estime alors les valeurs des différents paramètres selon la méthode du maximum de vraisemblance à l'aide de la fonction $arima$. Les résultats se trouvent à la \textit{Table III}.
 \newline\newline
@@ -156,10 +160,13 @@ On regarde ensuite les histogrammes et les graphiques QQ aux \textit{Table IV} e
 \newline\newline
 On effectue alors, pour tenter de départager nos modèles, un dernier test, soit le test de Shapiro-Wilk évaluant le dégré de corrélation entre les quantiles des résidus standardisés et la loi normale standard. L'hypothèse nulle étant que la distribution des résidus suit une loi normale, on confirme, avec des p-values respectives de `r round(ttaux011.sw$p.value,4)`, `r round(ttaux110.sw$p.value,4)` et `r round(ttaux111.sw$p.value,4)`, que les résidus engendrés par les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) sont tous normalement distribués pour un test à un niveau de confiance $\alpha$ de 5%.
 \newline\newline
-On cherche également un modèle dont les résidus sont indépendants, sans quoi on ne retrouve pas un bruit blanc. On effectue alors le run-test sur nos modèles pour tester l'indépendance entre les résidus. Comme l'hypothèse nulle est que les résidus sont indépendants, on conclut à un niveau de confiane de $\alpha=5$ qu'ils le sont bels et biens si la p-value est inférieur à 95% **(C EST PAS SUPPOSÉ ETRE SI C EST SUPERIEUR A 5%?)**. On trouve alors, pour les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) des valeurs respectives de `r round(ttaux011.rt,4)`, `r round(ttaux110.rt,4)` et `r round(ttaux111.rt,4)` pour les p-value de leur run-tests.
+On cherche également un modèle dont les résidus sont indépendants, sans quoi on ne retrouve pas un bruit blanc. On effectue alors le run-test sur nos modèles pour tester l'indépendance entre les résidus. Comme l'hypothèse nulle est que les résidus sont indépendants, on conclut à un niveau de confiane de $\alpha=5$% qu'on ne peut rejetter l'hypothèse nulle si la p-value est supérieur à 5%. On trouve alors, pour les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) des valeurs respectives de `r round(ttaux011.rt,4)`, `r round(ttaux110.rt,4)` et `r round(ttaux111.rt,4)` pour les p-value de leur run-tests. Ainsi, aucun de ces modèles rejettent l'hypothèse de normalité.
 \newline\newline
-On se trouve ainsi dans l'impossibilité de départager nos modèles à l'aide de l'étude de leurs résidus. On choisit alors de conserver le modèle IMA(1,1) parce qu'il est simple, parce que la valeur maximale de sa fonction de vraisemblance est la plus élevée et parce que la valeur du test AIC est la plus faible selon la \textit{Table III}. De plus, ce modèle nous permet de retrouver un modèle de loi lognormale pour modéliser le taux de US/Euro qui est un modèle fortement utilisé dans le monde de la mathématique financière.
-
+On effectue un dernier test sur nos modèles afin de les départager. Le test de Ljung-Box à pour hypothèse nul que le modèle testé sur notre série chronologique est approprié. On remarque des \textit{Figure 10} à \textit{Figure 12} que les p-values des trois modèle ne permettent pas de rejetter l'hypothèse nulle. Les trois modèles sont donc, selon ce test, appropriés pour modéliser la série chronologique à l'étude.
+\newline\newline
+On se trouve ainsi dans l'impossibilité de départager nos modèles à l'aide de l'étude de leurs résidus en plus de voir tous ces modèles être jugés appropriés selon le test de Ljung-Box. On choisit alors de conserver le modèle IMA(1,1) parce qu'il est simple, parce que la valeur maximale de sa fonction de vraisemblance est la plus élevée et parce que la valeur du test AIC est la plus faible selon la \textit{Table III}. De plus, ce modèle nous permet de retrouver un modèle de loi lognormale pour modéliser le taux US/Euro qui est un modèle fortement utilisé dans le monde de la mathématique financière.
+\newline\newline
+On regarde, pour finaliser le choix de modèle, la question de l'\textit{overfiting}.
 
 tsoutliers = TA BESOIN DE DOWNLOADER LE PACKAGE TSOUTLIERS pour retirer les données aberrantes avec la fonction "tso"
 
@@ -266,3 +273,18 @@ qqnorm(rstandard(ttaux110),main='ARI(1,1)',xlab='Quantiles théoriques', ylab=''
 qqnorm(rstandard(ttaux111),main='ARIMA(1,1,1)',xlab='', ylab='',cex=0.2)
 ```
 \textbf{Figure 9.} Graphiques QQ des modèles étuidés du logarithme du taux de change US/Euro.
+
+```{r fig1.10, eval=T, echo=F, fig.height=5, warning=F}
+tsdiag(ttaux011, gof=15, omit.inital=F)
+```
+\textbf{Figure 10.} Graphiques des résidus standardisés, de l'autocorrélation des résidus et des p-values du test de Ljung-Box du modèle IMA(1,1) pour le logarithme du taux de change US/Euro.
+
+```{r fig1.11, eval=T, echo=F, fig.height=5, warning=F}
+tsdiag(ttaux110, gof=15, omit.inital=F)
+```
+\textbf{Figure 11.} Graphiques des résidus standardisés, de l'autocorrélation des résidus et des p-values du test de Ljung-Box du modèle ARI(1,1) pour le logarithme du taux de change US/Euro.
+
+```{r fig1.12, eval=T, echo=F, fig.height=5, warning=F}
+tsdiag(ttaux111, gof=15, omit.inital=F)
+```
+\textbf{Figure 12.} Graphiques des résidus standardisés, de l'autocorrélation des résidus et des p-values du test de Ljung-Box du modèle ARIMA(1,1,1) pour le logarithme du taux de change US/Euro.
