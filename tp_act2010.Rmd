@@ -24,8 +24,8 @@ Le présent rapport se veut être l'analyse de différentes séries chronologiqu
 ```{r no1.1, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
 library('TSA')
 library('tseries')
-#library('stats')
-#library('forcast')
+library('forecast')
+library('plotrix')
 
 # Importation des données
 #taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
@@ -123,7 +123,7 @@ W_t -\mu&= e_t-\theta e_{t-1} \qquad \qquad \qquad &(2)\\
 W_t- \mu&= \phi (W_{t-1}-\mu) + e_t-\theta e_{t-1} \qquad \qquad \qquad &(3)\\
 \end{aligned}
 $$
-où
+Où
 $$
 W_t=\nabla \text{ln}(Y_t)
 $$
@@ -146,8 +146,8 @@ ttaux011.sw <- shapiro.test(rstandard(ttaux011))
 ttaux110.sw <- shapiro.test(rstandard(ttaux110))
 ttaux111.sw <- shapiro.test(rstandard(ttaux111))
 #test de dependance des residus (run.test)
-ttaux110.rt <- runs(residuals(ttaux011))$pvalue
-ttaux011.rt <- runs(residuals(ttaux110))$pvalue
+ttaux011.rt <- runs(residuals(ttaux011))$pvalue
+ttaux110.rt <- runs(residuals(ttaux110))$pvalue
 ttaux111.rt <- runs(residuals(ttaux111))$pvalue
 #test de Ljung-Box
 ttaux011.lb <- Box.test(residuals(ttaux011), lag= 10, type='Ljung-Box', fitdf=1)
@@ -162,7 +162,7 @@ On peut alors faire l'analyse de nos résidus pour faire notre choix parmi nos t
 \newline\newline
 On regarde ensuite les histogrammes et les graphiques QQ aux \textit{Table IV} et \textit{Figure 9} des résidus. On remarque que les trois histogrammes semblent tracer avec efficacité la cloche de la loi normal. De plus, on remarque des trois graphiques QQ, que les résidus observés sont en tout point simiaire à leur valeur théorique en cas de normalité. Ces deux test semblent donc justifier la distribution normale des résidus de nos trois modèles.
 \newline\newline
-On effectue alors, pour tenter de départager nos modèles, un dernier test, soit le test de Shapiro-Wilk évaluant le dégré de corrélation entre les quantiles des résidus standardisés et la loi normale standard. L'hypothèse nulle étant que la distribution des résidus suit une loi normale, on confirme, avec des p-values respectives de `r round(ttaux011.sw$p.value,4)`, `r round(ttaux110.sw$p.value,4)` et `r round(ttaux111.sw$p.value,4)`, que les résidus engendrés par les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) sont tous normalement distribués pour un test à un niveau de confiance $\alpha$ de 5%.
+On effectue alors, pour tenter de départager nos modèles, le test de Shapiro-Wilk évaluant le dégré de corrélation entre les quantiles des résidus standardisés et la loi normale standard. L'hypothèse nulle étant que la distribution des résidus suit une loi normale On confirme, avec des p-values respectives de `r round(ttaux011.sw$p.value,4)`, `r round(ttaux110.sw$p.value,4)` et `r round(ttaux111.sw$p.value,4)`, que les résidus engendrés par les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) sont tous normalement distribués pour un test à un niveau de confiance $\alpha$ de 5%.
 \newline\newline
 On cherche également un modèle dont les résidus sont indépendants, sans quoi on ne retrouve pas un bruit blanc. On effectue alors le run-test sur nos modèles pour tester l'indépendance entre les résidus. Comme l'hypothèse nulle est que les résidus sont indépendants, on conclut à un niveau de confiane de $\alpha=5$% qu'on ne peut rejetter l'hypothèse nulle si la p-value est supérieur à 5%. On trouve alors, pour les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) des valeurs respectives de `r round(ttaux011.rt,4)`, `r round(ttaux110.rt,4)` et `r round(ttaux111.rt,4)` pour les p-value de leur run-tests. Ainsi, aucun de ces modèles rejettent l'hypothèse de normalité.
 \newline\newline
@@ -174,7 +174,14 @@ On regarde, pour finaliser le choix de modèle, la question de l'\textit{overfit
 
 ##Prédictions
 ```{r no1.6, echo=F}
-ttaux011.pred<-predict(ttaux011, n.ahead=12)
+ttaux011.pred<-predict(ttaux011, n.ahead=10)
+ttaux011.inf<-ttaux011.pred$pred-qnorm(0.975)*ttaux011.pred$se
+ttaux011.sup<-ttaux011.pred$pred+qnorm(0.975)*ttaux011.pred$se
+#modele final
+ttt.pred<-round(exp(ttaux011.pred$pred+0.5*ttaux011.pred$se^2),4)
+ttt.inf<-round(exp(ttaux011.inf), 4)
+ttt.sup<-round(exp(ttaux011.sup), 4)
+err<-rendement[217:226] - ttt.pred
 ```
 
 On peut alors effectuer les prédictions des taux de changes US/Euro des mois de l'année 2017 grâce au modèle suivant.
@@ -182,9 +189,17 @@ On peut alors effectuer les prédictions des taux de changes US/Euro des mois de
 $$
 \nabla \text{ln} (Y_t)=e_t-`r round(ttaux011$coef,4)` e_{t-1}
 $$
+Il est important de noter que, puisqu'une transformation logarithmique a été effectuée sur les données du taux de change US/Euro, le prédicicteur de $Y_t$, $\hat{Y}_t(l)$, sera tel que;
+
+$$
+\hat{Y}_t(l)=\text{exp}\left(\hat{Z}_t+\frac{\text{Var}[e_t(l)]}{2}\right)
+$$
+Où $\hat{Z}_t(l)$ est le prédicteur de $Z_t$ défini tel que $Z_t=\text{ln}Y_t$.
+\newline\newline
+Le graphique des valeurs prédites se trouvent aux graphiques \textit{Figure 13} et \textit{Figure 14}. On remarque d'abord du second graphique que toutes les valeurs du taux de change US/Euro observées en 2017 se trouvent à l'intérieur de l'intervalle de confiance de nos prédictions. L'intervalle de confiance est fait à un niveau de confiance de 95%.
 
 
-
+\newpage
 
 #SAAQ
 
@@ -251,6 +266,9 @@ $$
   & & & &  de vraisemblance \\ \hline \hline
   IMA(1,1) & $\mu$ & 0 & $`r round(ttaux011$aic,0)`$ & $`r round(ttaux011$loglik,0)`$\\
     & $\theta$ & $`r round(ttaux011$coef,4)`$&  &\\ \hline
+  IMA(1,2) & $\mu$ & 0 & $`r round(ttaux012$aic,0)`$ & $`r round(ttaux012$loglik,0)`$\\
+    & $\theta_1$ & $`r round(ttaux012$coef[1],4)`$&  &\\
+    & $\theta_2$ & $`r round(ttaux012$coef[2],4)`$&  &\\ \hline
   ARI(1,1) & $\mu$ & 0& $`r round(ttaux110$aic,0)`$ &$`r round(ttaux110$loglik,0)`$\\
     & $\phi$ & $`r round(ttaux110$coef,4)`$&  &\\ \hline
   ARIMA(1,1,1) & $\mu$ & 0& $`r round(ttaux111$aic,0)`$ &$`r round(ttaux111$loglik,0)`$\\
@@ -298,7 +316,18 @@ tsdiag(ttaux111, gof=15, omit.inital=F)
 ```
 \textbf{Figure 12.} Graphiques des résidus standardisés, de l'autocorrélation des résidus et des p-values du test de Ljung-Box du modèle ARIMA(1,1,1) pour le logarithme du taux de change US/Euro.
 
-```{r fig1.13, eval=T, echo=F, fig.height=5, warning=F}
-plot(ttaux011, n.ahead=12, ylab='Valeur du logarithme', xlab='Années')
+\newpage
+```{r fig1.13, eval=T, echo=F,fig.height=3.2, warning=F}
+plot(ttaux011, n.ahead=12, ylab='Valeur du logarithme', xlab='Années', cex=0.5)
 ```
-\textbf{Figure 13.} Logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2016 avec prédictions pour l'année 2017.
+\textbf{Figure 13.} Logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2016 avec prédictions pour l'année 2017 et intervalle de confiance à 95%.
+
+```{r fig1.14, eval=T, echo=F,fig.height=4.9, warning=F}
+plotCI(ttt.pred, ylab='Taux de change US/Euro', xlab='Mois', ylim=c(0.8, 1.3), li=ttt.inf, ui=ttt.sup)
+lines(rendement[217:226], type='o', col='Red')
+legend(x=0.8,y=0.92,legend=c("Prédictions","Observations"),
+       lty=c(1,1),lwd=c(2,2),col=c("black","red"))
+```
+\textbf{Figure 14.} Comparaison entre les valeurs prédites du taux de change US/Euro grâce au modèle IMA(1,1) avec intervalle de confiance et les valeurs observerées pour l'année 2017.
+
+
