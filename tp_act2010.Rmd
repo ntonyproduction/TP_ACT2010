@@ -14,7 +14,7 @@ lang: fr
 
 #Introduction au rapport
 
-Le présent rapport se veut être l'analyse de différentes séries chronologiques. Plus précisément, il a pour but de trouver le modèle qui s'ajuste le plus exactement à nos échantillons de données. En bref, le travail consiste à séparer nos bases de données en un échantillon \textit{entraînement} qui sert à trouver un modèle et en un échantillon \textit{test} qui sert à valider la précision du modèle retenu. Le travail est fait à partir de deux bases de données pour un total de cinq variables à modéliser. La première base de données, traitée au numéro 1, contient les données mensuelles du taux de change du dollar américain par rapport à l'euro de janvier 1999 à décembre 2016. La seconde base de données contient une série de statistiques de la \textit{SAAQ}, soit le nombre d'accidents automobiles avec dommages corporels, le nombre de personnes accidentées, le nombre de demandes d'indemnités et le coût total de l'indemnisation (en dollar constant 2015) pour les années 1978 à 2015 inclusivement. Ces données seront traîtées au numéro 2. Afin d'alléger la lecture du présent rapport, les figures et les tableaux sont placés en annexe.
+Le présent rapport se veut être l'analyse de différentes séries chronologiques. Plus précisément, il a pour but de trouver le modèle qui s'ajuste le plus exactement à nos échantillons de données. En bref, le travail consiste à séparer nos bases de données en un échantillon \textit{entraînement} qui sert à trouver un modèle et en un échantillon \textit{test} qui sert à valider la précision du modèle retenu. Le travail est fait à partir de deux bases de données pour un total de cinq variables à modéliser. La première base de données, traitée au numéro 1, contient les données mensuelles du taux de change du dollar américain par rapport à l'euro de janvier 1999 à décembre 2016. La seconde base de données contient une série de statistiques de la \textit{SAAQ}, soit le nombre d'accidents automobiles avec dommages corporels, le nombre de personnes accidentées, le nombre de demandes d'indemnités et le coût total de l'indemnisation (en dollar constant 2015) pour les années 1978 à 2015 inclusivement. Ces données seront traîtées au numéro 2. Afin d'alléger la lecture du présent rapport, le code R est placé en annexe.
 
 \newpage
 
@@ -24,12 +24,12 @@ Le présent rapport se veut être l'analyse de différentes séries chronologiqu
 ```{r no1.1, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
 library('TSA')
 library('tseries')
-library('forecast')
+#library('forecast')
 library('plotrix')
 
 # Importation des données
-#taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
-taux <- read.csv2("C:/Users/TEMP/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
+taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
+#taux <- read.csv2("C:/Users/TEMP/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
 rendement<-taux$US.Euro
 anne.mois<-taux$Année.mois
 
@@ -37,9 +37,24 @@ anne.mois<-taux$Année.mois
 ttaux<-ts(rendement,start=c(1999,1),end=c(2016,12),frequency = 12)
 ```
 
-Tout d'abord, nous observons, à la \textit{Figure 1} en annexe, la série chronologique du taux de change américain/européen depuis janvier 1999 jusqu'à décembre 2016. Les données ont été collectées de façon quotidienne pour ensuite être transformées en taux mensuelles. 
-\newline\newline
+Tout d'abord, nous observons, à la \textit{Figure 15}, la série chronologique du taux de change américain/européen depuis janvier 1999 jusqu'à décembre 2016. Les données ont été collectées de façon quotidienne pour ensuite être transformées en taux mensuelles.
+
+```{r fig1.1, echo=F, fig.height=3}
+# graphique de la série
+plot(ttaux,ylab='USD/Euro', xlab="Année", type="o", cex=0.5)
+abline(h=1)
+```
+\centerline{\textbf{Figure 1.} Taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.}
+
+\vspace{5mm}
+
 Grâce à une première analyse, on remarque sur le tableau de la fonction d'autocorrélation échantillonale qu'il y a une forte autocorrélation dans notre jeu de données et que celle-ci diminue lentement plus le lag augmente (voir \textit{Figure 2}). On soupçonne donc fortement ce processus d'être non-stationnaire. Il n'est pas nécessaire de tracer le graphique de la fonction d'autocorrélation partielle puisqu'on doit d'abord stationnariser notre processus avant de réellement débuter notre analyse.
+
+
+```{r fig1.2, eval=TRUE, echo=FALSE,fig.height=3}
+acf(ttaux, main='')
+```
+\centerline{\textbf{Figure 2.} Fonction d'autocorrélation échantillonales du taux de change US/Euro  (lag étant exprimé en années).}
 
 ##Test de stationnarité
 
@@ -67,8 +82,14 @@ $$
 
 $\lambda$ est donc déterminé en maximisant la fonction de log-vraisemblance de nos données fournie à la \textit{Figure 3}.
 
+```{r fig1.3, eval=T, echo=F, fig.height=3, message=FALSE, warning=FALSE}
+BoxCox.ar(ttaux)
+```
+\textbf{Figure 3.} Fonction du logarithme de vraissemblance de la transformée de Box-Cox de la série chronologique du taux de change US/Euro.
 
-On constate que $\lambda = 0.1$ semble être l'estimé MLE situé au centre de l'intervalle de confiance 95%, soit $]-0.5, 0.7[$. Puisque $\lambda = 0$ est dans notre intervale de confiance, cette valeur du paramètre est également à considérer. Dans le cas où le processus serait à différencier une seule fois, la transformation logarithmique est particuliairement intéressante puisqu'elle permet de modéliser non pas le «prix» du taux de change, mais sont rendement comme il est usage de le faire dans le cas d'outils financiers. En effet, soit $Y_t$ le prix d'un outil financier au temps $t$,le modèle logarithmique modélise le rendement de la façon suivante.[^n1] SI ON GARDE PLUS LOIN LE MODELE ARIMA(0,1,1) CELA REVIENS AU MODELE LOGNORMALE (A MENTIONNER)
+\vspace{5mm}
+
+On constate que $\lambda = 0.1$ semble être l'estimé MLE situé au centre de l'intervalle de confiance 95%, soit $]-0.5, 0.7[$. Puisque $\lambda = 0$ est dans notre intervale de confiance, cette valeur du paramètre est également à considérer. Dans le cas où le processus serait à différencier une seule fois, la transformation logarithmique est particuliairement intéressante puisqu'elle permet de modéliser non pas le «prix» du taux de change, mais sont rendement comme il est usage de le faire dans le cas d'outils financiers. En effet, soit $Y_t$ le prix d'un outil financier au temps $t$, le modèle logarithmique modélise le rendement de la façon suivante[^n1]
 
 [^n1]: WEISHAUS, Abraham, SOA Exam MFE Models for Financial Economics 10th Edition.
 
@@ -80,23 +101,67 @@ $$
 log\left(\frac{Y_t}{Y_{t-1}}\right)=X
 $$
 On conserve alors cette transformation à condition que la première différenciation de notre processus soit stationnaire. Le graphique de cette transformation est affiché à la \textit{Figure 4}.
-\newline\newline
+
+```{r fig1.4, eval=T, echo=F, fig.height=3}
+plot(log(ttaux), type='o',xlab="Année", ylab='Valeur du logarithme', cex=0.5)
+abline(h=0)
+```
+\centerline{\textbf{Figure 4.} Logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2016.}
+
+\vspace{5mm}
+
 ```{r no1.4, echo=F, warning=F}
 #ar(diff(log(ttaux)))
 ttaux.log.adf <- adf.test(diff(log(ttaux)), k=ar(diff(log(ttaux)))$order)
 ```
 
-Suite à une première différenciation, on effectue à nouveau le test augmenté de Dickey-Fuller. On remarque cette fois que, avec un processus autorégressif d'ordre 1 tel que suggéré par la fonction $ar$, on ne peut rejetter l'hypothèse de stationnarité avec un p-value inférieur à `r round(ttaux.log.adf$p.value,4)*100`%. Ainsi, tel que mentionné précédement, la transformation logarithmique est conservée. Le graphique de la première différenciation du logarithme de la série chronologique à l'étude se trouve à la \textit{Figure 5}.
+Suite à une première différenciation, on effectue à nouveau le test augmenté de Dickey-Fuller. Avec un processus autorégressif d'ordre 1 tel que suggéré par la fonction $ar$, on remarque cette fois qu'on ne peut rejetter pas l'hypothèse de stationnarité avec un p-value inférieur à `r round(ttaux.log.adf$p.value,4)*100`%. Ainsi, tel que mentionné précédement, la transformation logarithmique est conservée. Le graphique de la première différenciation du logarithme de la série chronologique à l'étude se trouve ci-dessous à la \textit{Figure 5}.
+
+```{r fig1.5, eval=T, echo=F, fig.height=3}
+plot(diff(log(ttaux)), type='o',xlab="Année", ylab='Différentiation du logarithme', cex=0.5)
+abline(h=0)
+```
+\centerline{\textbf{Figure 5.} Première différentiation du logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.}
 
 ## Identification du modèle
 
 Maintenant que la série est stationnaire, on peut en identifier le modèle. La première différenciation du logarithme du taux de change US/Euro est dorénavent notre modèle de base. On fera ainsi référence à ce modèle par défaut. 
 \newline\newline
 On observe les fonctions d'autocorrélation et d'autocorrélation partielle affichées aux \textit{Figure 6} et \textit{Figure 7} de cette série. On remarque que la fonction d'autocorrélation suggère fortement un modèle à moyenne mobile d'ordre 1, soit IMA(1,1) pour notre modèle tansformé alors que la fonction d'autocorrélation partielle suggère un modèle autorégressif d'ordre 1, soit ARI(1,1). On testera alors également le modèle ARIMA(1,1,1) qui est suggéré par la combinaison de ces graphiques.
-\newline\newline
-On observe ensuite la fonction d'autocorrélation étendue afin de voir si ce test à un autre modèle à proposer. Le tableau de la fonction EACF est à la \textit{Table I}. On observe d'abord de ce tableau que le modèle IMA(1,1) est suggéré pour la différenciation de notre modèle transformé initial. On peut également chercher à savoir si la valeur du $o$ en ARMA(0,1) et du $x$ en ARMA(1,1) sont significativement différent de leur valeurs inverses ($x$ pour le $o$ et vice versa), sans quoi le modèle ARIMA(1,1,1) serait également suggeré par le tableau EACF. Cependant, comme il fut déjà décidé d'évaluer la pertinance du modèle ARIMA(1,1,1) suite à l'analyse des fonction d'autocorrélation et d'autocorrélation partielle, il n'est pas nécessaire de test la pertiance de ce modèle selon le EACF.
-\newline\newline
-Le dernier test effectué pour ajuster un modèle à notre série chronologique est le test du BIC. Le tableau du BIC est tracé à la \textit{Table II} propose un modèle ARI(1,1). L'ordre maximal de moyenne mobile pour ce test a été établi à 1, sans quoi la fonction \textit{armasubsets} permettant de tracer le tableau du BIC retourne des avertissements de forte dépendance linéaire entre les paramètres. On étudiera ainsi les quatre modèles proposés par les tests précédents qui peuvent être résumé de la façon suivante;
+
+```{r fig1.6, eval=T, echo=F, fig.height=3}
+acf(diff(log(ttaux)), main='')
+```
+\textbf{Figure 6.} Fonction d'autocorrélation de la première différentiation du logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.
+
+```{r fig1.7, eval=T, echo=F, fig.height=3}
+pacf(diff(log(ttaux)), main='', ylab='PACF')
+```
+\textbf{Figure 7.} Fonction d'autocorrélation partielle de la première différentiation du logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.
+
+\hspace{5mm}
+
+On observe ensuite la fonction d'autocorrélation étendue afin de voir si ce test à un autre modèle à proposer. Le tableau de la fonction EACF est à la \textit{Table I}. On observe d'abord de ce tableau que le modèle IMA(1,1) est suggéré pour la différenciation de notre modèle transformé initial. On peut également chercher à savoir si la valeur du $o$ en ARMA(0,1) et du $x$ en ARMA(1,1) sont significativement différent de leur valeurs inverses ($x$ pour le $o$ et vice versa), sans quoi le modèle ARIMA(1,1,1) serait également suggeré par le tableau EACF. Cependant, comme il fut déjà décidé d'évaluer la pertinance du modèle ARIMA(1,1,1) suite à l'analyse des fonction d'autocorrélation et d'autocorrélation partielle, il n'est pas nécessaire de tester la pertinance de ce modèle selon le EACF.
+
+\vspace{5mm}
+
+```{r table1.1, eval=T, echo=F, fig.height=3}
+eacf(diff(log(ttaux)))
+```
+\textbf{Table I.} Tableau de la fonction EACF de la première différentiation du logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.
+
+\vspace{5mm}
+
+Le dernier test effectué pour ajuster un modèle à notre série chronologique est le test du BIC. Le tableau du BIC (tracé à la \textit{Table II}) propose un modèle ARI(1,1). L'ordre maximal de moyenne mobile pour ce test a été établi à 1, sans quoi la fonction \textit{armasubsets} permettant de tracer le tableau du BIC retourne des avertissements de forte dépendance linéaire entre les paramètres. 
+
+```{r table1.2, eval=T, echo=F, fig.height=3}
+plot(armasubsets(y=diff(log(ttaux)), nar=10, nma=1, y.name='test',ar.method='ols'))
+```
+\textbf{Table II.} Tableau de la fonction BIC de la première différentiation du logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.
+
+\newpage
+
+On étudiera ainsi les quatre modèles proposés par les tests précédents qui peuvent être résumé de la façon suivante;
 
 $$
 \begin{tabular}{| l | r |}
@@ -114,7 +179,7 @@ $$
  \end{tabular}
 $$
 
-On teste alors les modèles ARI(1,1), IMA(1,1) et ARIMA(1,1,1) qui sont développé, dans l'ordre, des façons suivantes.
+On teste alors respectivement les modèles ARI(1,1), IMA(1,1) et ARIMA(1,1,1) suivants
 
 $$
 \begin{aligned}
@@ -157,107 +222,7 @@ ttaux111.lb <- Box.test(residuals(ttaux111), lag= 10, type='Ljung-Box', fitdf=1)
 ttaux012<-arima(log(ttaux), order=c(0,1,2), method='ML')
 ```
 On estime alors les valeurs des différents paramètres selon la méthode du maximum de vraisemblance à l'aide de la fonction $arima$. Les résultats se trouvent à la \textit{Table III}.
-\newline\newline
-On peut alors faire l'analyse de nos résidus pour faire notre choix parmi nos trois modèles. Les résidus standardisés de ces trois modèles sont tracés à la \textit{Figure 8}. On remarque d'abord que ces trois courbes se superposent et ne peuvent donc pas être utilisées pour sélectionner un modèle. De plus, on remarque de ce graphique que les valeurs de résidus supérieures à 2 en valeur absolue sont relativement fréquentes ce qui nous poussent à questionner la théorie selon laquelle les résidus suivent une loi normale. En effet, dans le cas des résidus normaux, les valeurs supérieurs à 2 en valeur absolue devrait ce que matérialiser dans environ `r round(1-pnorm(2),4)*100`% des cas. La fréquence observée est nettement supérieur.
-\newline\newline
-On regarde ensuite les histogrammes et les graphiques QQ aux \textit{Table IV} et \textit{Figure 9} des résidus. On remarque que les trois histogrammes semblent tracer avec efficacité la cloche de la loi normal. De plus, on remarque des trois graphiques QQ, que les résidus observés sont en tout point simiaire à leur valeur théorique en cas de normalité. Ces deux test semblent donc justifier la distribution normale des résidus de nos trois modèles.
-\newline\newline
-On effectue alors, pour tenter de départager nos modèles, le test de Shapiro-Wilk évaluant le dégré de corrélation entre les quantiles des résidus standardisés et la loi normale standard. L'hypothèse nulle étant que la distribution des résidus suit une loi normale On confirme, avec des p-values respectives de `r round(ttaux011.sw$p.value,4)`, `r round(ttaux110.sw$p.value,4)` et `r round(ttaux111.sw$p.value,4)`, que les résidus engendrés par les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) sont tous normalement distribués pour un test à un niveau de confiance $\alpha$ de 5%.
-\newline\newline
-On cherche également un modèle dont les résidus sont indépendants, sans quoi on ne retrouve pas un bruit blanc. On effectue alors le run-test sur nos modèles pour tester l'indépendance entre les résidus. Comme l'hypothèse nulle est que les résidus sont indépendants, on conclut à un niveau de confiane de $\alpha=5$% qu'on ne peut rejetter l'hypothèse nulle si la p-value est supérieur à 5%. On trouve alors, pour les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) des valeurs respectives de `r round(ttaux011.rt,4)`, `r round(ttaux110.rt,4)` et `r round(ttaux111.rt,4)` pour les p-value de leur run-tests. Ainsi, aucun de ces modèles rejettent l'hypothèse de normalité.
-\newline\newline
-On effectue un dernier test sur nos modèles afin de les départager. Le test de Ljung-Box à pour hypothèse nul que le modèle testé sur notre série chronologique est approprié. On remarque des \textit{Figure 10} à \textit{Figure 12} que les p-values des trois modèle ne permettent pas de rejetter l'hypothèse nulle. Les trois modèles sont donc, selon ce test, appropriés pour modéliser la série chronologique à l'étude.
-\newline\newline
-On se trouve ainsi dans l'impossibilité de départager nos modèles à l'aide de l'étude de leurs résidus en plus de voir tous ces modèles être jugés appropriés selon le test de Ljung-Box. On choisit alors de conserver le modèle IMA(1,1) parce qu'il est simple, parce que la valeur maximale de sa fonction de vraisemblance est la plus élevée et parce que la valeur du test AIC est la plus faible selon la \textit{Table III}. De plus, ce modèle nous permet de retrouver un modèle de loi lognormale pour modéliser le taux US/Euro qui est un modèle fortement utilisé dans le monde de la mathématique financière.
-\newline\newline
-On regarde, pour finaliser le choix de modèle, la question de l'\textit{overfiting}. Comme le modèle ARIMA(1,1,1) a déjà été testé, il suffit ici d'obeserver le comportement du modèle IMA(1,2). On remarque de la \textit{Table III} que le paramètre $\theta_1$ du modèle IMA(1,2) est très près du paramètre $\theta$ du modèle IMA(1,1) en plus d'avoir un paramètre $\theta_2$ avoisinant 0. On peut alors écarter ce modèle. Le modèle IMA(1,1) est donc celui avec lequel les prédictions seront effectuées. 
 
-##Prédictions
-```{r no1.6, echo=F}
-ttaux011.pred<-predict(ttaux011, n.ahead=10)
-ttaux011.inf<-ttaux011.pred$pred-qnorm(0.975)*ttaux011.pred$se
-ttaux011.sup<-ttaux011.pred$pred+qnorm(0.975)*ttaux011.pred$se
-#modele final
-ttt.pred<-round(exp(ttaux011.pred$pred+0.5*ttaux011.pred$se^2),4)
-ttt.inf<-round(exp(ttaux011.inf), 4)
-ttt.sup<-round(exp(ttaux011.sup), 4)
-err<-rendement[217:226] - ttt.pred
-```
-
-On peut alors effectuer les prédictions des taux de changes US/Euro des mois de l'année 2017 grâce au modèle suivant.
-
-$$
-\nabla \text{ln} (Y_t)=e_t-`r round(ttaux011$coef,4)` e_{t-1}
-$$
-Il est important de noter que, puisqu'une transformation logarithmique a été effectuée sur les données du taux de change US/Euro, le prédicicteur de $Y_t$, $\hat{Y}_t(l)$, sera tel que;
-
-$$
-\hat{Y}_t(l)=\text{exp}\left(\hat{Z}_t+\frac{\text{Var}[e_t(l)]}{2}\right)
-$$
-Où $\hat{Z}_t(l)$ est le prédicteur de $Z_t$ défini tel que $Z_t=\text{ln}Y_t$.
-\newline\newline
-Le graphique des valeurs prédites se trouvent aux graphiques \textit{Figure 13} et \textit{Figure 14}. On remarque d'abord du second graphique que toutes les valeurs du taux de change US/Euro observées en 2017 se trouvent à l'intérieur de l'intervalle de confiance de nos prédictions. L'intervalle de confiance est fait à un niveau de confiance de 95%.
-
-
-\newpage
-
-#SAAQ
-
-
-
-
-\newpage
-
-# Annexe
-## Tableaux et figures
-```{r fig1.1, echo=F, fig.height=3.3}
-# graphique de la série
-plot(ttaux,ylab='USD/Euro', xlab="Année", type="o", cex=0.5)
-abline(h=1)
-```
-\textbf{Figure 1.} Taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.
-
-```{r fig1.2, eval=TRUE, echo=FALSE,fig.height=3.5}
-acf(ttaux, main='')
-```
-\textbf{Figure 2.} Fonction d'autocorrélation échantillonales du taux de change US/Euro. Le lag étant exprimé en années.
-
-```{r fig1.3, eval=T, echo=F, fig.height=3.3, message=FALSE, warning=FALSE}
-BoxCox.ar(ttaux)
-```
-\textbf{Figure 3.} Fonction du logarithme de vraissemblance de la transformée de Box-Cox de la série chronologique du taux de change US/Euro.
-
-```{r fig1.4, eval=T, echo=F, fig.height=3.3}
-plot(log(ttaux), type='o',xlab="Année", ylab='Valeur du logarithme', cex=0.5)
-abline(h=0)
-```
-\textbf{Figure 4.} Logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2016.
-
-```{r fig1.5, eval=T, echo=F, fig.height=3.3}
-plot(diff(log(ttaux)), type='o',xlab="Année", ylab='Différentiation du logarithme', cex=0.5)
-abline(h=0)
-```
-\textbf{Figure 5.} Première différentiation du logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.
-
-```{r fig1.6, eval=T, echo=F, fig.height=3.3}
-acf(diff(log(ttaux)), main='')
-```
-\textbf{Figure 6.} Fonction d'autocorrélation de la première différentiation du logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.
-
-```{r fig1.7, eval=T, echo=F, fig.height=3.3}
-pacf(diff(log(ttaux)), main='', ylab='PACF')
-```
-\textbf{Figure 7.} Fonction d'autocorrélation partielle de la première différentiation du logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.
-\newline\newline
-```{r table1.1, eval=T, echo=F, fig.height=3.3}
-eacf(diff(log(ttaux)))
-```
-\textbf{Table I.} Tableau de la fonction EACF de la première différentiation du logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.
-
-```{r table1.2, eval=T, echo=F, fig.height=3.3}
-plot(armasubsets(y=diff(log(ttaux)), nar=10, nma=1, y.name='test',ar.method='ols'))
-```
-\textbf{Table II.} Tableau de la fonction BIC de la première différentiation du logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2015.
 
 $$
 \begin{tabular}{| l c |c|c| r |}
@@ -279,55 +244,186 @@ $$
 $$
 \textbf{Table III.} Tableau des valeurs estimées des différents coefficients obtenus de la fonction \textit{arima} pour les trois modèles à l'étude du logarithme du taux de change US/Euro.
 
-```{r fig1.8, eval=T, echo=F, fig.height=5, fig.width=9}
-plot(rstandard(ttaux011), ylab='résidus standardisés', type='l', col='blue')
+\vspace{5mm}
+
+On peut alors faire l'analyse de nos résidus pour faire notre choix parmi nos trois modèles. Les résidus standardisés de ces trois modèles sont tracés à la \textit{Figure 8}. On remarque d'abord que ces trois courbes se superposent et ne peuvent donc pas être utilisées pour sélectionner un modèle. De plus, on remarque de ce graphique que les valeurs de résidus supérieures à 2 en valeur absolue sont relativement fréquentes ce qui nous poussent à questionner la théorie selon laquelle les résidus suivent une loi normale. En effet, dans le cas des résidus normaux, les valeurs supérieurs à 2 en valeur absolue ne devrait apparaître qu'environ `r round(1-pnorm(2),4)*100`% du temps. La fréquence observée est nettement supérieur.
+
+```{r fig1.8, eval=T, echo=F, fig.height=4, fig.width=9}
+plot(rstandard(ttaux011), ylab='résidus standardisés', type='l', col='green')
 lines(rstandard(ttaux110), col='red')
-lines(rstandard(ttaux111), col='black')
+lines(rstandard(ttaux111), col='blue')
 abline(h=0)
 ```
 \textbf{Figure 8.} Superposition des graphiques des résidus standardisés des modèles ARI(1,1), IMA(1,1) et ARIMA(1,1,1) du logarithme du taux de change US/Euro.
 
-```{r table1.4, eval=T, echo=F, fig.height=3.3, fig.width=2.3}
+\vspace{5mm}
+
+On regarde ensuite les histogrammes et les graphiques QQ aux \textit{Table IV} et \textit{Figure 9} des résidus. On remarque que les trois histogrammes semblent tracer avec efficacité la cloche de la loi normal. De plus, on remarque des trois graphiques QQ, que les résidus observés sont en tout point simiaire à leur valeur théorique en cas de normalité. Ces deux test semblent donc justifier la distribution normale des résidus de nos trois modèles.
+
+```{r table1.4, eval=T, echo=F, fig.height=3, fig.width=2.3}
 hist(rstandard(ttaux011), xlab='',ylab='fréquence', main='IMA(1,1)')
 hist(rstandard(ttaux110), xlab='résidus standardisés',ylab='', main='ARI(1,1)')
 hist(rstandard(ttaux111), xlab='',ylab='', main='ARIMA(1,1,1)')
 ```
 \textbf{Table IV.} Histogramme des résidus standardisés des modèles étuidés du logarithme du taux de change US/Euro.
 
-```{r fig1.9, eval=T, echo=F, fig.height=3.3, fig.width=2.3}
+```{r fig1.9, eval=T, echo=F, fig.height=3, fig.width=2.3}
 qqnorm(rstandard(ttaux011), main='IMA(1,1)',ylab='Quantiles observés',xlab='',cex=0.2)
 qqnorm(rstandard(ttaux110),main='ARI(1,1)',xlab='Quantiles théoriques', ylab='',cex=0.2)
 qqnorm(rstandard(ttaux111),main='ARIMA(1,1,1)',xlab='', ylab='',cex=0.2)
 ```
 \textbf{Figure 9.} Graphiques QQ des modèles étuidés du logarithme du taux de change US/Euro.
 
-```{r fig1.10, eval=T, echo=F, fig.height=5, warning=F}
+\vspace{5mm}
+
+On effectue alors, pour tenter de départager nos modèles, le test de Shapiro-Wilk évaluant le dégré de corrélation entre les quantiles des résidus standardisés et la loi normale standard. L'hypothèse nulle étant que la distribution des résidus suit une loi normale On confirme, avec des p-values respectives de `r round(ttaux011.sw$p.value,4)`, `r round(ttaux110.sw$p.value,4)` et `r round(ttaux111.sw$p.value,4)`, que les résidus engendrés par les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) sont tous normalement distribués pour un test à un niveau de confiance $\alpha$ de 5%.
+\newline\newline
+On cherche également un modèle dont les résidus sont indépendants, sans quoi on ne retrouve pas un bruit blanc. On effectue alors le run-test sur nos modèles pour tester l'indépendance entre les résidus. Comme l'hypothèse nulle est que les résidus sont indépendants, on conclut à un niveau de confiane de $\alpha=5$% qu'on ne peut rejetter l'hypothèse nulle si la p-value est supérieur à 5%. On trouve alors, pour les modèles IMA(1,1), ARI(1,1) et ARIMA(1,1,1) des valeurs respectives de `r round(ttaux011.rt,4)`, `r round(ttaux110.rt,4)` et `r round(ttaux111.rt,4)` pour les p-value de leur run-tests. Ainsi, aucun de ces modèles rejettent l'hypothèse de normalité.
+\newline\newline
+On effectue un dernier test sur nos modèles afin de les départager. Le test de Ljung-Box à pour hypothèse nul que le modèle testé sur notre série chronologique est approprié. On remarque des \textit{Figure 10} à \textit{Figure 12} que les p-values des trois modèle ne permettent pas de rejetter l'hypothèse nulle. Les trois modèles sont donc, selon ce test, appropriés pour modéliser la série chronologique à l'étude.
+
+```{r fig1.10, eval=T, echo=F, fig.height=4.1, warning=F}
 tsdiag(ttaux011, gof=15, omit.inital=F)
 ```
 \textbf{Figure 10.} Graphiques des résidus standardisés, de l'autocorrélation des résidus et des p-values du test de Ljung-Box du modèle IMA(1,1) pour le logarithme du taux de change US/Euro.
 
-```{r fig1.11, eval=T, echo=F, fig.height=5, warning=F}
+```{r fig1.11, eval=T, echo=F, fig.height=4.1, warning=F}
 tsdiag(ttaux110, gof=15, omit.inital=F)
 ```
 \textbf{Figure 11.} Graphiques des résidus standardisés, de l'autocorrélation des résidus et des p-values du test de Ljung-Box du modèle ARI(1,1) pour le logarithme du taux de change US/Euro.
 
-```{r fig1.12, eval=T, echo=F, fig.height=5, warning=F}
+```{r fig1.12, eval=T, echo=F, fig.height=4.1, warning=F}
 tsdiag(ttaux111, gof=15, omit.inital=F)
 ```
 \textbf{Figure 12.} Graphiques des résidus standardisés, de l'autocorrélation des résidus et des p-values du test de Ljung-Box du modèle ARIMA(1,1,1) pour le logarithme du taux de change US/Euro.
 
-\newpage
-```{r fig1.13, eval=T, echo=F,fig.height=3.2, warning=F}
+\vspace{5mm}
+
+On se trouve ainsi dans l'impossibilité de départager nos modèles à l'aide de l'étude de leurs résidus en plus de voir tous ces modèles être jugés appropriés selon le test de Ljung-Box. On choisit alors de conserver le modèle IMA(1,1) parce qu'il est simple, parce que la valeur maximale de sa fonction de vraisemblance est la plus élevée et parce que la valeur du test AIC est la plus faible selon la \textit{Table III}. De plus, ce modèle nous permet de retrouver un modèle de loi lognormale pour modéliser le taux US/Euro qui est un modèle fortement utilisé dans le monde de la mathématique financière.
+\newline\newline
+On regarde, pour finaliser le choix de modèle, la question de l'\textit{overfiting}. Comme le modèle ARIMA(1,1,1) a déjà été testé, il suffit ici d'observer le comportement du modèle IMA(1,2). On remarque de la \textit{Table III} que le paramètre $\theta_1$ du modèle IMA(1,2) est très près du paramètre $\theta$ du modèle IMA(1,1) en plus d'avoir un paramètre $\theta_2$ avoisinant 0. Sachant que $\hat{\theta}_2 \approx$ `r round(arima(x = log(ttaux), order = c(0, 1, 2), method = "ML")$coef['ma2'], 4)` et que son écart-type est de 0.0645, l'intervalle de confiance de $\hat\theta_2$ est $IC = \hat\theta_2 \pm Z_{1-\alpha/2} \sqrt{Var(\hat\theta_2)} =$ [`r round(0.0207-qnorm(1-0.05/2)*0.0645,4)`, `r round(0.0207+qnorm(1-0.05/2)*0.0645, 4)`]. Puisque 0 est dans l'intervalle de confiance, on peut négliger ce paramètre et on peut alors écarter ce modèle. Le modèle IMA(1,1) est donc celui avec lequel les prédictions seront effectuées. 
+
+##Prédictions
+```{r no1.6, echo=F}
+ttaux011.pred<-predict(ttaux011, n.ahead=10)
+ttaux011.inf<-ttaux011.pred$pred-qnorm(0.975)*ttaux011.pred$se
+ttaux011.sup<-ttaux011.pred$pred+qnorm(0.975)*ttaux011.pred$se
+#modele final
+ttt.pred<-round(exp(ttaux011.pred$pred+0.5*ttaux011.pred$se^2),4)
+ttt.inf<-round(exp(ttaux011.inf), 4)
+ttt.sup<-round(exp(ttaux011.sup), 4)
+err<-rendement[217:226] - ttt.pred
+```
+
+On peut alors effectuer les prédictions des taux de changes US/Euro des mois de l'année 2017 grâce au modèle suivant
+
+$$
+\nabla \text{ln} (Y_t)=e_t-`r round(ttaux011$coef,4)` e_{t-1}
+$$
+Il est important de noter que, puisqu'une transformation logarithmique a été effectuée sur les données du taux de change US/Euro, le prédicteur de $Y_t$, $\hat{Y}_t(l)$, sera tel que
+
+$$
+\hat{Y}_t(l)=\text{exp}\left(\hat{Z}_t+\frac{\text{Var}[e_t(l)]}{2}\right)
+$$
+Où $\hat{Z}_t(l)$ est le prédicteur de $Z_t$ défini tel que $Z_t=\text{ln}Y_t$.
+\newline\newline
+Le graphique des valeurs prédites se trouvent aux graphiques \textit{Figure 13} et \textit{Figure 14}. On remarque d'abord du second graphique que toutes les valeurs du taux de change US/Euro observées en 2017 se trouvent à l'intérieur de l'intervalle de confiance de nos prédictions. L'intervalle de confiance est fait à un niveau de confiance de 95%.
+
+```{r fig1.13, eval=T, echo=F,fig.height=3.2, fig.width=7.5, warning=F}
 plot(ttaux011, n.ahead=12, ylab='Valeur du logarithme', xlab='Années', cex=0.5)
+abline(h=0)
 ```
 \textbf{Figure 13.} Logarithme du taux de change US/Euro mensuelle de janvier 1999 à décembre 2016 avec prédictions pour l'année 2017 et intervalle de confiance à 95%.
 
-```{r fig1.14, eval=T, echo=F,fig.height=4.9, warning=F}
+```{r fig1.14, eval=T, echo=F,fig.height=3.7, warning=F}
 plotCI(ttt.pred, ylab='Taux de change US/Euro', xlab='Mois', ylim=c(0.8, 1.3), li=ttt.inf, ui=ttt.sup)
 lines(rendement[217:226], type='o', col='Red')
 legend(x=0.8,y=0.92,legend=c("Prédictions","Observations"),
        lty=c(1,1),lwd=c(2,2),col=c("black","red"))
 ```
 \textbf{Figure 14.} Comparaison entre les valeurs prédites du taux de change US/Euro grâce au modèle IMA(1,1) avec intervalle de confiance et les valeurs observerées pour l'année 2017.
+
+```{r no1.7, echo=F}
+a <- ts(rendement,start=c(1999,1),end=c(2017,10),frequency = 12)[217:226] #valeurs des 10 derniers mois notre série
+```
+
+
+On retrouve également les valeurs des prédictions du taux de change US/Euro pour les 10 premiers mois de l'année 2017 dans le tableau suivant
+
+| Mois  | $Y_{t+l}$  | $\hat Y_t(l)$  | différence  | $\sqrt{Var(\hat Y_t(l))}$  | Borne inf. de prédiction  | Borne sup. de prédiction  |
+|:------:|:---:|:---:|:---:|:-----------:|:------:|:------:|
+| Janvier    |`r round(a[1], 4)` |`r round(exp(ttaux011.pred$pred[1] + 0.5*ttaux011.pred$se[1]), 4)`   | | `r round(ttaux011.pred$se[1], 4)`   |   |  |   
+| Février    |`r round(a[2], 4)` |`r round(exp(ttaux011.pred$pred[2] + 0.5*ttaux011.pred$se[2]), 4)`   | | `r round(ttaux011.pred$se[2], 4)`   |   |   |   
+| Mars       |`r round(a[3], 4)` |`r round(exp(ttaux011.pred$pred[3] + 0.5*ttaux011.pred$se[3]), 4)`   | | `r round(ttaux011.pred$se[3], 4)`   |   |   |   
+| Avril      |`r round(a[4], 4)` |`r round(exp(ttaux011.pred$pred[4] + 0.5*ttaux011.pred$se[4]), 4)`   | | `r round(ttaux011.pred$se[4], 4)`   |   |   |   
+| Mai        |`r round(a[5], 4)` |`r round(exp(ttaux011.pred$pred[5] + 0.5*ttaux011.pred$se[5]), 4)`   | | `r round(ttaux011.pred$se[5], 4)`   |   |   |   
+| Juin       |`r round(a[6], 4)` |`r round(exp(ttaux011.pred$pred[6] + 0.5*ttaux011.pred$se[6]), 4)`   | | `r round(ttaux011.pred$se[6], 4)`   |   |   |   
+| Juillet    |`r round(a[7], 4)` |`r round(exp(ttaux011.pred$pred[7] + 0.5*ttaux011.pred$se[7]), 4)`   | | `r round(ttaux011.pred$se[7], 4)`   |   |   |   
+| Août       |`r round(a[8], 4)` |`r round(exp(ttaux011.pred$pred[8] + 0.5*ttaux011.pred$se[8]), 4)`   | | `r round(ttaux011.pred$se[8], 4)`   |   |   |   
+| Septembre  |`r round(a[9], 4)` |`r round(exp(ttaux011.pred$pred[9] + 0.5*ttaux011.pred$se[9]), 4)`   | | `r round(ttaux011.pred$se[9], 4)`   |   |   |   
+| Octobre    |`r round(a[10], 4)` |`r round(exp(ttaux011.pred$pred[10] + 0.5*ttaux011.pred$se[10]), 4)`  | | `r round(ttaux011.pred$se[10], 4)`  |   |   |
+
+**Faudrais dire dans notre conclusion que E[Y_t(l)] = mu quand l tend vers l'infini (jpas sur si c est sa la réponse la, faudrais confirmer en développant l'équation.**
+
+\newpage
+
+#SAAQ
+## Analyse primaire du jeu de données
+```{r no2.1, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
+# Importation des données
+saaq <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/SAAQ-2015.csv")
+
+naadc<-ts(saaq$NAADC,start=c(saaq$Année[1],1),end=c(saaq$Année[length(saaq$Année)],1), frequency=1)
+npa<-ts(saaq$NPA,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
+ndi<-ts(saaq$NDI,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
+cti<-ts(saaq$CTI,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
+```
+
+Tout d'abord, nous observons, à la \textit{Figure 15}, la série chronologique du nombre d'accidents avec dommages corporels (auto) depuis 1978 jusqu'en 2015. Puisque la banque de données semble comporter certaines valeurs aberrantes, on applique des changements à ces données grâce à la commande ??????. Les nouvelles séries chronologiques sont affichées ci-dessous
+
+```{r fig2.1.1, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center'}
+# graphiques de la série
+plot(naadc,ylab="Fréquence", xlab="Année", main="Nbre d'accidents avec dommages corporels (auto)", type="o", cex=0.5, col="red")
+plot(npa,ylab="Fréquence", xlab="Année", main="Nbre de personnes accidentées", type="o", cex=0.5, col="blue")
+```
+
+```{r fig2.1.2, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center'}
+# graphiques de la série
+plot(ndi,ylab="Fréquence", xlab="Année", main="Nbre de demandes d'indemnités", type="o", cex=0.5, col="green")
+plot(cti,ylab="Coût", xlab="Année", main="Coût total de l'indemnisation", type="o", cex=0.5)
+```
+\textbf{Figure 15.} Graphiques des différentes séries chronologiques après modification des données aberrantes depuis 1978 jusqu'en 2015 (naadc en rouge, npa en bleu, ndi en vert et cti en noir).
+
+\vspace{5mm}
+
+Nous procédons avec l'analyse du graphique de la fonction d'autorégression pour chacun d'eux à la \textit{Figure 16}. On remarque pour le graphique ACF du naadc que 
+
+```{r fig2.2.1, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center'}
+acf(naadc, main="Fonction d'autocorrélation du naadc")
+acf(npa, main="Fonction d'autocorrélation du npa")
+```
+
+```{r fig2.2.2, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center'}
+acf(ndi, main="Fonction d'autocorrélation du ndi")
+acf(cti, main="Fonction d'autocorrélation du cti")
+```
+\textbf{Figure 16.} Graphiques des différentes fonctions d'autocorrélation depuis 1978 jusqu'en 2015 avec un lag exprimé en année.
+
+##Test de stationnarité
+```{r no1.2, echo=F}
+#test augmente de Dickey-Fuller
+#ar(ttaux)
+naadc.adf <- adf.test(naadc, k=ar(naadc)$order)
+npa.adf <- adf.test(npa, k=ar(npa)$order)
+ndi.adf <- adf.test(ndi, k=ar(ndi)$order)
+cti.adf <- adf.test(cti, k=ar(cti)$order)
+```
+
+\newpage
+
+# Annexe
+## Code
+
+
 
 
