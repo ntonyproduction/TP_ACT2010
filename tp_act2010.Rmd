@@ -28,7 +28,8 @@ library('forecast')
 library('plotrix')
 
 # Importation des données
-taux <- read.csv2("C:/Users/angag426/Documents/GitHub/TP_ACT2010//Taux_de_change_US_Euro.csv")
+#taux <- read.csv2("C:/Users/angag426/Documents/GitHub/TP_ACT2010//Taux_de_change_US_Euro.csv")
+taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
 #taux <- read.csv2("C:/Users/TEMP/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
 rendement<-taux$US.Euro
 anne.mois<-taux$Année.mois
@@ -373,7 +374,8 @@ En observant le graphique et la valeur de nos prédictions, on observe que celle
 ## Analyse primaire du jeu de données
 ```{r no2.1, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
 # Importation des données
-saaq <- read.csv2("C:/Users/angag426/Documents/GitHub/TP_ACT2010/SAAQ-2015.csv")
+#saaq <- read.csv2("C:/Users/angag426/Documents/GitHub/TP_ACT2010/SAAQ-2015.csv")
+saaq <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/SAAQ-2015.csv")
 
 naadc<-ts(saaq$NAADC,start=c(saaq$Année[1],1),end=c(saaq$Année[length(saaq$Année)],1), frequency=1)
 npa<-ts(saaq$NPA,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
@@ -507,20 +509,153 @@ Les graphiques de l'autocorrélation partielle semblent écarter la présence d'
 
 On effectue un autre test pour ajuster un modèle aux séries chronologiques présentement à l'étude, le test de l'autocorrélation étendu. On obtient les tables qui suivent
 
-```{r fig2.6.1, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center', warning=F}
+```{r fig2.6.1, echo=F, eval=F, out.width=c('500px', '300px'), fig.show='hold', fig.align="left"}
 # graphiques des EACF
 eacf(diff(naadc^-1), ar.max=5,ma.max=10)
 eacf(diff(npa^-1), ar.max=5,ma.max=10)
 ```
 
-```{r fig2.6.2, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center', warning=F}
+```{r fig2.6.2, echo=F, eval=F, out.width=c('500px', '300px'), fig.show='hold',fig.align="left"}
 # graphiques des EACF
 eacf(diff(log(ndi)), ar.max=5,ma.max=10)
 eacf(diff(cti), ar.max=5,ma.max=10)
 ```
+
+\includegraphics{eacf_naadc}
+\includegraphics{eacf_npa}
+\includegraphics{eacf_ndi}
+\hspace{7.5mm} \includegraphics{eacf_cti}
+
 **FIGURE WHATEVER EACF**
 
+Les graphiques provenant des tests d'autocorrélation étendue nous proposent de façon respective une ARMA(0,0), ARMA(0,0), ARMA(0,1) et ARMA(0,0) pour les modèles transformés et différenciés NAADC, NPA, NDI et CTI.
 
+Il ne reste plus qu'à effectuer le critère du BIC pour conclure quels modèles seront retenus.
+
+```{r fig2.7.1, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center', warning=F}
+# graphiques des BIC
+plot(armasubsets(y=diff(naadc^-1), nar=3, nma=3, y.name = "test", ar.method = "ols"))
+plot(armasubsets(y=diff(npa^-1), nar=3, nma=3, y.name = "test", ar.method = "ols"))
+```
+
+```{r fig2.7.2, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center', warning=F}
+# graphiques des BIC
+plot(armasubsets(y=diff(log(ndi)), nar=3, nma=3, y.name = "test", ar.method = "ols"))
+plot(armasubsets(y=diff(cti), nar=3, nma=3, y.name = "test", ar.method = "ols"))
+```
+
+Les graphiques provenant du critère BIC nous proposent de façon respective une AR(1), MA(1), AR(1) et MA(3) (avec $\theta_1$ et $\theta_2$ égal à 0) pour les modèles transformés et différenciés NAADC, NPA, NDI et CTI. Il est pertinent de mentionner que le BIC tente de renvoyer le modèle ARMA(p,q) qui s'applique le mieux à la série sans jamais proposer le bruit blanc.
+
+**T TU CERTAIN DE LA DERNIERE PHRASE??? PCQ Y ME PROPOSE QUAND MEME DES AR(0)**
+
+Les modèles testés seront donc les suivants:
+
+* NDAAC
+
+$$
+\begin{aligned}
+\nabla Y_t^{-1} - \mu &= e_t \quad \quad \quad &(1) \\
+\nabla Y_t^{-1} - \mu &= e_t + \phi \left(\nabla Y_{t-1}^{-1} - \mu \right) \quad \quad \quad &(2)
+\end{aligned}
+$$
+
+* NPA
+
+$$
+\begin{aligned}
+\nabla Y_t^{-1} - \mu &= e_t \quad \quad \quad &(3) \\
+\nabla Y_t^{-1} - \mu &= e_t - \theta e_{t-1} \quad \quad \quad &(4)
+\end{aligned}
+$$
+
+* NDI
+
+$$
+\begin{aligned}
+\nabla lnY_t - \mu &= e_t \quad \quad \quad &(5) \\
+\nabla lnY_t - \mu &= e_t - \theta e_{t-1} \quad \quad \quad &(6) \\
+\nabla lnY_t - \mu &= e_t + \phi \left(\nabla lnY_{t-1} - \mu \right) \quad \quad \quad &(7)
+\end{aligned}
+$$
+
+* CTI
+
+$$
+\begin{aligned}
+\nabla Y_t - \mu &= e_t \quad \quad \quad &(8) \\
+\nabla Y_t - \mu &= e_t - \theta e_{t-3} \quad \quad \quad &(9)
+\end{aligned}
+$$
+
+##Estimation des paramètres des différents modèles et tests de résidus
+```{r no2.3, echo=F}
+# assignation de l'arima pour chaque modele
+naadc000 <- arima(diff(naadc^-1), order = c(0,0,0), method = "ML")
+naadc100 <- arima(diff(naadc^-1), order = c(1,0,0), method = "ML")
+
+npa000 <- arima(diff(npa^-1), order = c(0,0,0), method = "ML")
+npa001 <- arima(diff(npa^-1), order = c(0,0,1), method = "ML")
+
+ndi000 <- arima(diff(log(ndi)), order = c(0,0,0), method = "ML")
+ndi001 <- arima(diff(log(ndi)), order = c(0,0,1), method = "ML")
+ndi100 <- arima(diff(log(ndi)), order = c(1,0,0), method = "ML")
+
+cti000 <- arima(diff(cti), order = c(0,0,0), method = "ML")
+cti003 <- arima(diff(cti), order = c(0,0,3), fixed = c(0, 0, NA, NA), method = "ML")
+```
+
+Il faut maintenant estimer les paramètres de nos différents modèles. Les tableaux ci-dessous fournissent l'information nécessaire
+
+$$
+\begin{tabular}{| l c |c|c| r |}
+  \hline
+  Modèle pour NAADC & Paramètres & Valeurs estimés & AIC & Logarithme du max \\
+  & & & &  de vraisemblance \\ \hline \hline
+  ARIMA(0,1,0) & $\mu$ & $`r round(naadc000$coef[1],4)`$ & $`r round(naadc000$aic,0)`$ & $`r round(naadc000$loglik,1)`$\\    \hline
+  ARIMA(1,1,0) & $\mu$ & $`r round(naadc100$coef[2],4)`$ & $`r round(naadc100$aic,0)`$ & $`r round(naadc100$loglik,1)`$\\
+    & $\phi$ & $`r round(naadc100$coef[1],4)`$&  &\\
+  \hline
+ \end{tabular}
+$$
+
+$$
+\begin{tabular}{| l c |c|c| r |}
+  \hline
+  Modèle pour NPA & Paramètres & Valeurs estimés & AIC & Logarithme du max \\
+  & & & &  de vraisemblance \\ \hline \hline
+  ARIMA(0,1,0) & $\mu$ & $`r round(npa000$coef[1],4)`$ & $`r round(npa000$aic,0)`$ & $`r round(npa000$loglik,1)`$\\    \hline
+  ARIMA(0,0,1) & $\mu$ & $`r round(npa001$coef[2],4)`$ & $`r round(npa001$aic,0)`$ & $`r round(npa001$loglik,1)`$\\
+    & $\theta$ & $`r round(npa001$coef[1],4)`$&  &\\
+  \hline
+ \end{tabular}
+$$
+
+$$
+\begin{tabular}{| l c |c|c| r |}
+  \hline
+  Modèle pour NDI & Paramètres & Valeurs estimés & AIC & Logarithme du max \\
+  & & & &  de vraisemblance \\ \hline \hline
+  ARIMA(0,1,0) & $\mu$ & $`r round(ndi000$coef[1],4)`$ & $`r round(ndi000$aic,0)`$ & $`r round(ndi000$loglik,1)`$\\        \hline
+  ARIMA(0,1,1) & $\mu$ & $`r round(ndi001$coef[2],4)`$ & $`r round(ndi001$aic,0)`$ & $`r round(ndi001$loglik,1)`$\\
+    & $\theta$ & $`r round(ndi001$coef[1],4)`$&  &\\
+  \hline
+  ARIMA(1,1,0) & $\mu$ & $`r round(ndi100$coef[2],4)`$ & $`r round(ndi100$aic,0)`$ & $`r round(ndi100$loglik,1)`$\\
+    & $\phi$ & $`r round(ndi100$coef[1],4)`$&  &\\
+  \hline
+ \end{tabular}
+$$
+
+$$
+\begin{tabular}{| l c |c|c| r |}
+  \hline
+  Modèle pour CTI & Paramètres & Valeurs estimés & AIC & Logarithme du max \\
+  & & & &  de vraisemblance \\ \hline \hline
+  ARIMA(0,1,0) & $\mu$ & $`r cti003$coef[1]`$ & $`r round(cti000$aic,0)`$ & $`r round(cti000$loglik,1)`$\\    \hline
+  ARIMA(0,0,3) & $\mu$ & $`r cti003$coef[4]`$ & $`r round(cti003$aic,0)`$ & $`r round(cti003$loglik,1)`$\\
+    & $\theta$ & $`r cti003$coef[3]`$&  &\\
+  \hline
+ \end{tabular}
+$$
 
 \newpage
 
