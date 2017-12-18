@@ -24,11 +24,11 @@ Le présent rapport se veut être l'analyse de différentes séries chronologiqu
 ```{r no1.1, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
 library('TSA')
 library('tseries')
-#library('forecast')
+library('forecast')
 library('plotrix')
 
 # Importation des données
-taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
+taux <- read.csv2("C:/Users/angag426/Documents/GitHub/TP_ACT2010//Taux_de_change_US_Euro.csv")
 #taux <- read.csv2("C:/Users/TEMP/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
 rendement<-taux$US.Euro
 anne.mois<-taux$Année.mois
@@ -323,7 +323,7 @@ $$
 Il est important de noter que, puisqu'une transformation logarithmique a été effectuée sur les données du taux de change US/Euro, le prédicteur de $Y_t$, $\hat{Y}_t(l)$, sera tel que
 
 $$
-\hat{Y}_t(l)=\text{exp}\left(\hat{Z}_t+\frac{\text{Var}[e_t(l)]}{2}\right)
+\hat{Y}_t(l)=\text{exp}\left(\hat{Z}_t(l)+\frac{\text{Var}[e_t(l)]}{2}\right)
 $$
 Où $\hat{Z}_t(l)$ est le prédicteur de $Z_t$ défini tel que $Z_t=\text{ln}Y_t$.
 \newline\newline
@@ -350,20 +350,23 @@ a <- ts(rendement,start=c(1999,1),end=c(2017,10),frequency = 12)[217:226] #valeu
 
 On retrouve également les valeurs des prédictions du taux de change US/Euro pour les 10 premiers mois de l'année 2017 dans le tableau suivant
 
-| Mois  | $Y_{t+l}$  | $\hat Y_t(l)$  | différence  | $\sqrt{Var(\hat Y_t(l))}$  | Borne inf. de prédiction  | Borne sup. de prédiction  |
+| Mois  | $Y_{t+l}$  | $\hat Y_t(l)$  | $\hat e_t(l)$  | $\sqrt{Var(\hat Y_t(l))}$  | Borne inf. de prédiction  | Borne sup. de prédiction  |
 |:------:|:---:|:---:|:---:|:-----------:|:------:|:------:|
-| Janvier    |`r round(a[1], 4)` |`r round(exp(ttaux011.pred$pred[1] + 0.5*ttaux011.pred$se[1]), 4)`   | | `r round(ttaux011.pred$se[1], 4)`   |   |  |   
-| Février    |`r round(a[2], 4)` |`r round(exp(ttaux011.pred$pred[2] + 0.5*ttaux011.pred$se[2]), 4)`   | | `r round(ttaux011.pred$se[2], 4)`   |   |   |   
-| Mars       |`r round(a[3], 4)` |`r round(exp(ttaux011.pred$pred[3] + 0.5*ttaux011.pred$se[3]), 4)`   | | `r round(ttaux011.pred$se[3], 4)`   |   |   |   
-| Avril      |`r round(a[4], 4)` |`r round(exp(ttaux011.pred$pred[4] + 0.5*ttaux011.pred$se[4]), 4)`   | | `r round(ttaux011.pred$se[4], 4)`   |   |   |   
-| Mai        |`r round(a[5], 4)` |`r round(exp(ttaux011.pred$pred[5] + 0.5*ttaux011.pred$se[5]), 4)`   | | `r round(ttaux011.pred$se[5], 4)`   |   |   |   
-| Juin       |`r round(a[6], 4)` |`r round(exp(ttaux011.pred$pred[6] + 0.5*ttaux011.pred$se[6]), 4)`   | | `r round(ttaux011.pred$se[6], 4)`   |   |   |   
-| Juillet    |`r round(a[7], 4)` |`r round(exp(ttaux011.pred$pred[7] + 0.5*ttaux011.pred$se[7]), 4)`   | | `r round(ttaux011.pred$se[7], 4)`   |   |   |   
-| Août       |`r round(a[8], 4)` |`r round(exp(ttaux011.pred$pred[8] + 0.5*ttaux011.pred$se[8]), 4)`   | | `r round(ttaux011.pred$se[8], 4)`   |   |   |   
-| Septembre  |`r round(a[9], 4)` |`r round(exp(ttaux011.pred$pred[9] + 0.5*ttaux011.pred$se[9]), 4)`   | | `r round(ttaux011.pred$se[9], 4)`   |   |   |   
-| Octobre    |`r round(a[10], 4)` |`r round(exp(ttaux011.pred$pred[10] + 0.5*ttaux011.pred$se[10]), 4)`  | | `r round(ttaux011.pred$se[10], 4)`  |   |   |
+| Janvier    |`r round(a[1], 4)` |`r round(exp(ttaux011.pred$pred[1] + 0.5*ttaux011.pred$se[1]^2), 4)`   | `r round(exp(ttaux011.pred$pred[1] + 0.5*ttaux011.pred$se[1]^2) - a[1], 4)*(-1)` | `r round(ttaux011.pred$se[1], 4)`   | `r ttt.inf[1]`   | `r ttt.sup[1]` |   
+| Février    |`r round(a[2], 4)` |`r round(exp(ttaux011.pred$pred[2] + 0.5*ttaux011.pred$se[2]^2), 4)`   | `r round(exp(ttaux011.pred$pred[2] + 0.5*ttaux011.pred$se[2]^2) - a[2], 4)*(-1)` | `r round(ttaux011.pred$se[2], 4)`   | `r ttt.inf[2]`  | `r ttt.sup[2]`  |   
+| Mars       |`r round(a[3], 4)` |`r round(exp(ttaux011.pred$pred[3] + 0.5*ttaux011.pred$se[3]^2), 4)`   | `r round(exp(ttaux011.pred$pred[3] + 0.5*ttaux011.pred$se[3]^2) - a[3], 4)*(-1)` | `r round(ttaux011.pred$se[3], 4)`   | `r ttt.inf[3]`  |  `r ttt.sup[3]` |   
+| Avril      |`r round(a[4], 4)` |`r round(exp(ttaux011.pred$pred[4] + 0.5*ttaux011.pred$se[4]^2), 4)`   | `r round(exp(ttaux011.pred$pred[4] + 0.5*ttaux011.pred$se[4]^2) - a[4], 4)*(-1)` | `r round(ttaux011.pred$se[4], 4)`   | `r ttt.inf[4]`  |  `r ttt.sup[4]` |   
+| Mai        |`r round(a[5], 4)` |`r round(exp(ttaux011.pred$pred[5] + 0.5*ttaux011.pred$se[5]^2), 4)`   | `r round(exp(ttaux011.pred$pred[5] + 0.5*ttaux011.pred$se[5]^2) - a[5], 4)*(-1)` | `r round(ttaux011.pred$se[5], 4)`   | `r ttt.inf[5]`  |  `r ttt.sup[5]` |   
+| Juin       |`r round(a[6], 4)` |`r round(exp(ttaux011.pred$pred[6] + 0.5*ttaux011.pred$se[6]^2), 4)`   | `r round(exp(ttaux011.pred$pred[6] + 0.5*ttaux011.pred$se[6]^2) - a[6], 4)*(-1)` | `r round(ttaux011.pred$se[6], 4)`   | `r ttt.inf[6]`  |  `r ttt.sup[6]` |   
+| Juillet    |`r round(a[7], 4)` |`r round(exp(ttaux011.pred$pred[7] + 0.5*ttaux011.pred$se[7]^2), 4)`   | `r round(exp(ttaux011.pred$pred[7] + 0.5*ttaux011.pred$se[7]^2) - a[7], 4)*(-1)` | `r round(ttaux011.pred$se[7], 4)`   | `r ttt.inf[7]`  |  `r ttt.sup[7]` |   
+| Août       |`r round(a[8], 4)` |`r round(exp(ttaux011.pred$pred[8] + 0.5*ttaux011.pred$se[8]^2), 4)`   | `r round(exp(ttaux011.pred$pred[8] + 0.5*ttaux011.pred$se[8]^2) - a[8], 4)*(-1)` | `r round(ttaux011.pred$se[8], 4)`   | `r ttt.inf[8]`  |  `r ttt.sup[8]` |   
+| Septembre  |`r round(a[9], 4)` |`r round(exp(ttaux011.pred$pred[9] + 0.5*ttaux011.pred$se[9]^2), 4)`   | `r round(exp(ttaux011.pred$pred[9] + 0.5*ttaux011.pred$se[9]^2) - a[9], 4)*(-1)` | `r round(ttaux011.pred$se[9], 4)`   | `r ttt.inf[9]`  |  `r ttt.sup[9]` |   
+| Octobre    |`r round(a[10], 4)` |`r round(exp(ttaux011.pred$pred[10] + 0.5*ttaux011.pred$se[10]^2), 4)`  | `r round(exp(ttaux011.pred$pred[10] + 0.5*ttaux011.pred$se[10]^2) - a[10], 4)*(-1)` | `r round(ttaux011.pred$se[10], 4)`  | `r ttt.inf[10]`  |  `r ttt.sup[10]` |
 
-**Faudrais dire dans notre conclusion que E[Y_t(l)] = mu quand l tend vers l'infini (jpas sur si c est sa la réponse la, faudrais confirmer en développant l'équation.**
+où $\hat e_t(l) = Y_{t+l} - \hat Y_{t}(l)$ représente l'erreur de prédiction.
+
+## Conclusion
+En observant le graphique et la valeur de nos prédictions, on observe que celles-ci semblent converger vers une valeur bien précise. Cependant, plus on tente de prédire pour des périodes éloignées, plus notre intervalle de confiance grandit et plus notre incertitude devient élevée.
 
 \newpage
 
@@ -371,15 +374,20 @@ On retrouve également les valeurs des prédictions du taux de change US/Euro po
 ## Analyse primaire du jeu de données
 ```{r no2.1, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
 # Importation des données
-saaq <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/SAAQ-2015.csv")
+saaq <- read.csv2("C:/Users/angag426/Documents/GitHub/TP_ACT2010/SAAQ-2015.csv")
 
 naadc<-ts(saaq$NAADC,start=c(saaq$Année[1],1),end=c(saaq$Année[length(saaq$Année)],1), frequency=1)
 npa<-ts(saaq$NPA,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
 ndi<-ts(saaq$NDI,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
 cti<-ts(saaq$CTI,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
+
+naadc[tsoutliers(naadc)$index]<-tsoutliers(naadc)$replacements
+npa[tsoutliers(npa)$index]<-tsoutliers(npa)$replacements
+ndi[tsoutliers(ndi)$index]<-tsoutliers(ndi)$replacements
+cti[tsoutliers(cti)$index]<-tsoutliers(cti)$replacements
 ```
 
-Tout d'abord, nous observons, à la \textit{Figure 15}, la série chronologique du nombre d'accidents avec dommages corporels (auto) depuis 1978 jusqu'en 2015. Puisque la banque de données semble comporter certaines valeurs aberrantes, on applique des changements à ces données grâce à la commande ??????. Les nouvelles séries chronologiques sont affichées ci-dessous
+Tout d'abord, on fait l'analyse du jeu de données en lien avec la SAAQ. On étudie les valeurs de nos quatres séries chronologiques depuis 1978 jusqu'en 2015. Cela comprend la série du nombre d'accidents avec dommages corporels (NAADC), du nombre de personnes accidentés (NPA), du nombre de demandes d'indemnités (NDI), et du coût total de l'indemnisation en millions de dollars, et en dollars constants 2015 (CTI), le tout sur une base annuelle. Puisque la banque de données semble comporter certaines valeurs aberrantes, on applique des changements à ces données grâce à la commande *tsoutliers*. Les nouvelles séries chronologiques sont affichées ci-dessous dans la \textit{Figure 15}
 
 ```{r fig2.1.1, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center'}
 # graphiques de la série
@@ -392,32 +400,25 @@ plot(npa,ylab="Fréquence", xlab="Année", main="Nbre de personnes accidentées"
 plot(ndi,ylab="Fréquence", xlab="Année", main="Nbre de demandes d'indemnités", type="o", cex=0.5, col="green")
 plot(cti,ylab="Coût", xlab="Année", main="Coût total de l'indemnisation", type="o", cex=0.5)
 ```
-\textbf{Figure 15.} Graphiques des différentes séries chronologiques après modification des données aberrantes depuis 1978 jusqu'en 2015 (naadc en rouge, npa en bleu, ndi en vert et cti en noir).
+\textbf{Figure 15.} Graphiques des différentes séries chronologiques après modification des données aberrantes depuis 1978 jusqu'en 2015 (NAADC en rouge, NPA en bleu, NDI en vert et CTI en noir).
 
 \vspace{5mm}
 
-Nous procédons avec l'analyse du graphique de la fonction d'autorégression pour chacun d'eux à la \textit{Figure 16}. On remarque pour le graphique ACF du naadc que 
-
-```{r fig2.2.1, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center'}
-acf(naadc, main="Fonction d'autocorrélation du naadc")
-acf(npa, main="Fonction d'autocorrélation du npa")
-```
-
-```{r fig2.2.2, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center'}
-acf(ndi, main="Fonction d'autocorrélation du ndi")
-acf(cti, main="Fonction d'autocorrélation du cti")
-```
-\textbf{Figure 16.} Graphiques des différentes fonctions d'autocorrélation depuis 1978 jusqu'en 2015 avec un lag exprimé en année.
+On remarque prinicipalement deux choses de ces graphiques. D'abord, les trois premières séries chronologiques semblent très fortement corrélées. Ce constat aurait également pu découler de la définition même de ces variables qui sont logiquement, très fortement corrélées.
 
 ##Test de stationnarité
-```{r no1.2, echo=F}
+```{r no2.2, echo=F}
 #test augmente de Dickey-Fuller
-#ar(ttaux)
 naadc.adf <- adf.test(naadc, k=ar(naadc)$order)
 npa.adf <- adf.test(npa, k=ar(npa)$order)
 ndi.adf <- adf.test(ndi, k=ar(ndi)$order)
 cti.adf <- adf.test(cti, k=ar(cti)$order)
 ```
+
+L'analyse débute encore une fois par les tests de stationnarités. On commence ainsi par effectuer le test de Dickey-Fuller sur notre modèle pour tester ça stationnarité. 
+
+
+
 
 \newpage
 
