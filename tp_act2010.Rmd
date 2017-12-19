@@ -272,7 +272,7 @@ qqnorm(rstandard(ttaux011), main='IMA(1,1)',ylab='Quantiles observés',xlab='',c
 qqnorm(rstandard(ttaux110),main='ARI(1,1)',xlab='Quantiles théoriques', ylab='',cex=0.2)
 qqnorm(rstandard(ttaux111),main='ARIMA(1,1,1)',xlab='', ylab='',cex=0.2)
 ```
-\textbf{Figure 9.} Graphiques QQ des modèles étuidés du logarithme du taux de change US/Euro.
+\textbf{Figure 9.} Graphiques QQ des modèles étudiés du logarithme du taux de change US/Euro.
 
 \vspace{5mm}
 
@@ -687,7 +687,7 @@ hist(rstandard(naadc100), xlab='résidus standardisés',ylab='fréquence', main=
 
 On poursuit notre étude des résidus avec le graphique QQ. On remarque que les résidus observés ne semblent pas être similaire à leur valeur théorique en cas de normalité.
 
-```{r fig2.10, eval=T, echo=F, fig.height=3.3, fig.width=2.3, fig.show='hold', fig.align='center'}
+```{r fig2.10, eval=T, echo=F, fig.height=5, fig.width=2.3, fig.show='hold', fig.align='center', warning=F}
 qqnorm(rstandard(naadc000), main='ARMA(0,0)',ylab='Quantiles observés',xlab='Quantiles théoriques',cex=0.2)
 qqnorm(rstandard(naadc100),main='ARMA(1,0)',xlab='Quantiles théoriques', ylab='Quantiles observés',cex=0.2)
 ```
@@ -696,21 +696,198 @@ On effectue maintenant le test de Shapiro-Wilks pour départager nos modèles. L
 
 Par la suite, il faut effectuer le run-test pour déterminer si les résidus sont indépendants. Les p-values de nos modèles ARMA(0,0) et ARMA(1,0) sont `r round(naadc000.rt,4)` et `r round(naadc100.rt,4)`. Puisqu'elles sont nettement supérieures à 5%, on accepte l'hypothèse nulle qui stipule l'indépendance entre les résidus.
 
+```{r fig110, eval=T, echo=F, fig.height=3.3, fig.width=2.3, fig.show='hold', fig.align='center'}
+tsdiag(naadc000, gof=15, omit.inital=F)
+tsdiag(naadc100, gof=15, omit.inital=F)
+```
+
+Ljung-Box nous dit pour les modèles ARMA(0,0) et ARMA(1,0) que leur p-value sont respectivement de `r round(naadc000.lb$p.value, 4)` et `r round(naadc100.lb$p.value, 4)`. Puisqu'elle sont supérieures à 5%, les modèles sont appropriés.
+
+Puisque les résidus des 2 modèles semblent suivre une normale, que les log de max de vraisemblance sont identiques tout comme les AIC, on choisit de conserver le modèle ARMA(0,0), i.e. le bruit blanc parce qu'il est simple et que les graphiques ACF et PACF supportent cette hypothèse.
+
+```{r no2.5, echo=F, fig.height=4}
+naadc001 <- arima(diff(naadc^-1), order = c(0,0,1), method = "ML")
+```
+
+On regarde maintenant la question de la surparamétrisation. Dans notre cas, puisqu'on a déjà testé le modèle ARMA(1,0), il ne reste qu'à tester le modèle ARMA(0,1). Ce modèle semble adéquat avec un paramètre $\phi$ = 0.128972 et une moyenne $\mu$ = 2.988855e-07. Cependant, on reste avec notre hypothèse de départ et on suppose que le modèle final du NAADC est un bruit blanc, i.e. $\nabla Y_t^{-1} = e_t$.
 
 
 ### NPA
-```{r no2.5, echo=F}
+```{r npa1, echo=F}
+#test augmente de Dickey-Fuller
+npa000.sw <- shapiro.test(rstandard(npa000))
+npa001.sw <- shapiro.test(rstandard(npa001))
 
+npa000.rt <- runs(residuals(npa000))$pvalue
+npa001.rt <- runs(residuals(npa001))$pvalue
+
+npa000.lb <- Box.test(residuals(npa000), lag = 10, type = "Ljung-Box", fitdf = 1)
+npa001.lb <- Box.test(residuals(npa001), lag = 10, type = "Ljung-Box", fitdf = 1)
+```
+On cherche alors à savoir si les résidus suivent des lois normales.
+
+```{r npa2, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center', warning=F}
+plot(rstandard(npa000), ylab = "résidus standardisés", type = "l", col = "blue")
+lines(rstandard(npa001), col = "red")
+```
+\textbf{Figure ??} Superposition des graphiques des résidus standardisés des modèles ARIMA(0,1,0) et ARIMA(0,1,1) du data NPA.\newline\newline
+
+On remarque que les résidus standardisés sont inférieurs à 2 en valeurs absolues ce qui est souhaitable pour des lois normales centrées réduites.
+
+```{r npa3, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center', warning=F}
+# histogrammes
+hist(rstandard(npa000), xlab='résidus standardisés',ylab='fréquence', main='ARMA(0,0)')
+hist(rstandard(npa001), xlab='résidus standardisés',ylab='fréquence', main='ARMA(1,0)')
+```
+\textbf{Figure ??} Histogramme des résudies standardisés des modèles ARIMA(0,1,0) et ARIMA(0,1,1) du data NPA.\newline\newline
+
+Les histogrammes des deux modèles à l'étude semblent difficilement tracer de loi normal tel qu'on remarque du graphique ci-dessus.
+```{r npa4, eval=T, echo=F, fig.height=3.3, fig.width=2.3, fig.show='hold', fig.align='center'}
+qqnorm(rstandard(naadc000), main='ARMA(0,0)',ylab='Quantiles observés',xlab='Quantiles théoriques',cex=0.2)
+qqnorm(rstandard(naadc100),main='ARMA(1,0)',xlab='Quantiles théoriques', ylab='Quantiles observés',cex=0.2)
+```
+\textbf{Figure ??} graphique QQ des modèles ARIMA(0,1,0) et ARIMA(0,1,1) \newline\newline
+
+Les graphiques QQ ne semblent pas tracer de belle droite ce qui fait douter de la fiabilité de l'hypothèse de normalité.\newline\newline 
+
+Le test de Shapiro-Wilk ne permet toutefois pas de rejetter l'hyptohèse nulle de noramlité des résidus, ni dans le cas ARIMA(0,1,0), ni dans le cas du ARIMA(0,1,1) avec des  p-values respectivent de `r round(npa000.sw$p.value,3)` et `r round(npa001.sw$p.value,3)`. \newline\newline
+
+On ne peut ici rejetter l'hypothèse nulle d'indépendance des résidus du run-test avec des p-values respectives de`r round(npa000.rt,3)` et `r round(npa001.rt,3)` pour les mêmes modèles que ceux testés précédemment.\newline\newline
+
+```{r npa5, eval=T, echo=F, fig.height=4.1, warning=F}
+tsdiag(ttaux011, gof=15, omit.inital=F)
+```
+\textbf{Figure ??} Graphiques des résidus standardisés, de l'autocorrélation des résidus et des p-values du test de Ljung-Box du modèle ARIMA(0,1,0) pour le l'inverse de la différence de NPA.
+
+```{r fig111, eval=T, echo=F, fig.height=4.1, warning=F}
+tsdiag(ttaux110, gof=15, omit.inital=F)
+```
+\textbf{Figure ??} Graphiques des résidus standardisés, de l'autocorrélation des résidus et des p-values du test de Ljung-Box du modèle ARIMA(0,1,1) pour le l'inverse de la différence de NPA.\newline\newline
+
+Vient finalement le test de Ljung–Box qui a pour hypothèse nul que le modèle testé est approprié. On obtient, pour les modèles ARIMA(0,1,0) et ARIMA(0,0,1), les p-values respectives `r round(npa000.lb$p.value,3)` et `r round(npa001.lb$p.value,3)` qui viennent toutes deux justifiées leur modèles respectifs à un niveau de confiance arbitraire de 5%.\newline\newline
+
+Puisque les deux modèles engendrent les mêmes conclusion pour tous les tests, on se fit aux graphiques de l'ACF et du PACF pour retenir le bruit blanc comme modèle approprié. On se penche alors sur la question de l'overfiting. Comme le modèle ARIMA(0,1,1) a déjà été testé, on se penche uniquement sur le cas du modèeles ARIMA(1,1,0) pour l'overfiting.\newline\newline
+
+```{r npa6, echo=F}
+npa100 <- arima(naadc^-1, order = c(1,1,0), method = "ML")
+#test augmente de shapiro
+npa100.sw <- shapiro.test(rstandard(npa100))
+
+npa100.rt <- runs(residuals(npa100))$pvalue
+
+npa100.lb <- Box.test(residuals(npa100), lag = 10, type = "Ljung-Box", fitdf = 1)
 ```
 
+La sortie R de la fonction arima pour le modèle ARIMA(1,1,0) renvoit un conficient autorégressif de 0.1592 ce qui ne tend pas significativement vers 0. Ce modèle est donc à considérer. Toutefois, le test de Shapiro-Wilks pour la normalité des résidus de ce modèle renvoit un valeur de p-value de 6.003%, qui est concluant pour un test à niveau de confiance de 5%, mais pas très fortement. Comme la normalité des résidus du modèle est plus concluante pour le modèele ARIMA(0,1,0) et que les graphiques de l'ACF et du PACF suggèrent très fortement ce modèles, c'est celui qui sera retenu.\newline\newline
+
 ### NDI
-```{r no2.6, echo=F}
+```{r no2.7, echo=F}
 
 ```
 
 ### CTI
+```{r no2.8, echo=F}
+cti000.sw <- shapiro.test(rstandard(cti000))
+cti003.sw <- shapiro.test(rstandard(cti003))
 
+cti000.rt <- runs(residuals(cti000))$pvalue
+cti003.rt <- runs(residuals(cti003))$pvalue
 
+cti000.lb <- Box.test(residuals(cti000), lag = 10, type = "Ljung-Box", fitdf = 1)
+cti003.lb <- Box.test(residuals(cti003), lag = 10, type = "Ljung-Box", fitdf = 1)
+```
+
+Les résidus standardisés des deux modèles que nous avons gardés apparaîssent dans le graphique ci-dessous. On remarque que les courbes sont plutôt superposées. Puisque les valeurs des résidus standardisés sont généralement comprises dans une fourchette de $\pm 2$, l'hypothèse de normalité semble adéquate
+
+```{r fig2.12, echo=F, fig.height=3}
+# graphiques résidus standardisés
+plot(rstandard(cti000), ylab = "résidus standardisés", type = "l", col = "blue")
+lines(rstandard(cti003), col = "red")
+```
+
+On regarde maintenant les histogrammes des résidus. Les deux histogrammes ne semblent pas tracer la cloche de la loi normale tel que nous la connaissons.
+
+```{r fig2.13, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center', warning=F}
+# histogrammes
+hist(rstandard(cti000), xlab='résidus standardisés',ylab='fréquence', main='ARMA(0,0)')
+hist(rstandard(cti003), xlab='résidus standardisés',ylab='fréquence', main='ARMA(1,0)')
+```
+
+On poursuit notre étude des résidus avec le graphique QQ. On remarque que les résidus observés ne semblent pas être similaire à leur valeur théorique en cas de normalité.
+
+```{r fig2.14, eval=T, echo=F, fig.height=3.3, fig.width=2.3, fig.show='hold', fig.align='center'}
+qqnorm(rstandard(cti000), main='ARMA(0,0)',ylab='Quantiles observés',xlab='Quantiles théoriques',cex=0.2)
+qqnorm(rstandard(cti003),main='ARMA(0,3)',xlab='Quantiles théoriques', ylab='Quantiles observés',cex=0.2)
+```
+
+On effectue maintenant le test de Shapiro-Wilks pour départager nos modèles. Les p-values respectives du modèle ARMA(0,0) et ARMA(0,3) sont `r round(cti000.sw$p.value,4)` et `r round(cti003.sw$p.value,4)`. Puisque les p-values sont supérieures à 5%, nous gardons l'hypothèse nulle qui stipule que les résidus suivent une loi normale.
+
+Par la suite, il faut effectuer le run-test pour déterminer si les résidus sont indépendants. Les p-values de nos modèles ARMA(0,0) et ARMA(0,3) sont `r round(cti000.rt,4)` et `r round(cti003.rt,4)`. Puisqu'elles sont nettement supérieures à 5%, on accepte l'hypothèse nulle qui stipule l'indépendance entre les résidus.
+
+```{r fig114, eval=T, echo=F, fig.height=5, fig.width=2.3, fig.show='hold', fig.align='center', warning=F}
+tsdiag(cti000, gof=15, omit.inital=F)
+tsdiag(cti003, gof=15, omit.inital=F)
+```
+
+Ljung-Box nous dit pour les modèles ARMA(0,0) et ARMA(0,3) que leur p-value sont respectivement de `r round(cti000.lb$p.value, 4)` et `r round(cti003.lb$p.value, 4)`. Puisqu'elle sont supérieures à 5%, les modèles sont appropriés.
+
+Puisque les résidus des 2 modèles semblent suivre une normale, que les log de max de vraisemblance sont identiques tout comme les AIC, on choisit de conserver le modèle ARMA(0,0), i.e. le bruit blanc parce qu'il est simple et que les graphiques ACF et PACF supportent cette hypothèse.
+
+```{r no2.9, echo=F}
+cti001 <- arima(diff(cti), order = c(0,0,1), method = "ML")
+cti100 <- arima(diff(cti), order = c(1,0,0), method = "ML")
+
+cti100.sw <- shapiro.test(rstandard(cti100))
+cti001.sw <- shapiro.test(rstandard(cti001))
+```
+
+On regarde maintenant la question de la surparamétrisation. Dans notre cas, on doit tester le modèle ARMA(1,0) et ARMA(0,1). Les p-values respectives du modèle ARMA(1,0) et ARMA(0,1) sont `r round(cti100.sw$p.value,4)` et `r round(cti001.sw$p.value,4)`. Les résidus suivent bien une loi normale, mais ça reste que les graphiques ACF et PACF appuient le fait qu'il serait préférable de garder le modèle du bruit blanc, i.e. $\nabla Y_t = e_t$.
+
+##Prédictions
+### NAADC
+```{r no2.11, echo=F}
+# Prédictions avec bornes
+naadc000 <- arima(naadc^-1, order = c(0,1,0), method = "ML")
+naadc000.pred <- predict(naadc000, n.ahead = 5)
+naadc000.inf <- naadc000.pred$pred - qnorm(1-0.025)*naadc000.pred$se
+naadc000.sup <- naadc000.pred$pred + qnorm(1-0.025)*naadc000.pred$se
+
+# Modèle final
+naadc000.pred.reel <- naadc000.pred$pred^-1
+naadc000.inf.reel <- naadc000.inf^-1
+naadc000.sup.reel <- naadc000.sup^-1
+```
+
+On rappelle que notre modèle final est $\nabla Y_t^{-1} = e_t$. Les prédictions ainsi que les bornes de nos prédictions du modèle NAADC modifiés et différés sont affichés ci-dessous
+
+```{r fig2.11, eval=T, echo=F, fig.height=3.3, fig.show='hold', fig.align='center'}
+plot(naadc000, n.ahead=5, ylab='Fréquence', xlab='Années', cex=0.5)
+```
+
+Donc, les valeurs sont dans le tableau suivant
+
+| Année   | $Y_{t+l}$  | Borne inf.  | Borne sup.  |
+|:---:|:---:|:---:|:---:|
+| 2016  | 27917  | $`r round(naadc000.sup.reel[1], 4)`$  | $`r round(naadc000.inf.reel[1], 4)`$  |
+| 2017  | 27917  | $`r round(naadc000.sup.reel[2], 4)`$  | $`r round(naadc000.inf.reel[2], 4)`$  |
+| 2018  | 27917  | $`r round(naadc000.sup.reel[3], 4)`$  | $`r round(naadc000.inf.reel[3], 4)`$  |
+| 2019  | 27917  | $`r round(naadc000.sup.reel[4], 4)`$  | $`r round(naadc000.inf.reel[4], 4)`$  |
+| 2020  | 27917  | $`r round(naadc000.sup.reel[5], 4)`$  | $`r round(naadc000.inf.reel[5], 4)`$  |
+
+### CTI
+```{r no2.12, echo=F}
+# Prédictions avec bornes
+cti000 <- arima(cti, order = c(0,1,0), method = "ML")
+cti000.pred <- predict(cti000, n.ahead = 5)
+cti000.inf <- cti000.pred$pred - qnorm(1-0.025)*cti000.pred$se
+cti000.sup <- cti000.pred$pred + qnorm(1-0.025)*cti000.pred$se
+```
+
+On rappelle que notre modèle final est $\nabla Y_t = e_t$. Les prédictions ainsi que les bornes de nos prédictions du modèle CTI sont affichés ci-dessous
+
+```{r fig2.17, eval=T, echo=F, fig.height=3.3, fig.show='hold', fig.align='center'}
+plot(cti000, n.ahead=5, ylab='Coût', xlab='Années', cex=0.5)
+```
 
 \newpage
 
