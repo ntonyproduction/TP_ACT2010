@@ -892,7 +892,7 @@ On effectue maintenant le test de Shapiro-Wilks pour départager nos modèles. L
 
 Par la suite, il faut effectuer le run-test pour déterminer si les résidus sont indépendants. Les p-values de nos modèles ARMA(0,0) et ARMA(0,3) sont `r round(cti000.rt,4)` et `r round(cti003.rt,4)`. Puisqu'elles sont nettement supérieures à 5%, on accepte l'hypothèse nulle qui stipule l'indépendance entre les résidus.
 
-```{r fig114, eval=T, echo=F, fig.height=5.5, fig.width=3.5, fig.show='hold', warning=F}
+```{r fig114, eval=T, echo=F, fig.height=5, fig.width=3.5, fig.show='hold', warning=F}
 tsdiag(cti000, gof=15, omit.inital=F)
 tsdiag(cti003, gof=15, omit.inital=F)
 ```
