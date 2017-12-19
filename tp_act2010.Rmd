@@ -397,7 +397,6 @@ plot(npa,ylab="Fréquence", xlab="Année", main="Nbre de personnes accidentées"
 plot(ndi,ylab="Fréquence", xlab="Année", main="Nbre de demandes d'indemnités", type="o", cex=0.5, col="green")
 plot(cti,ylab="Coût", xlab="Année", main="Coût total de l'indemnisation", type="o", cex=0.5)
 ```
-\textbf{Figure 15.} Graphiques des différentes séries chronologiques après modification des données aberrantes depuis 1978 jusqu'en 2015 (NAADC en rouge, NPA en bleu, NDI en vert et CTI en noir).
 
 \vspace{5mm}
 
@@ -731,7 +730,7 @@ npa001.lb <- Box.test(residuals(npa001), lag = 10, type = "Ljung-Box", fitdf = 1
 ```
 On cherche alors à savoir si les résidus suivent des lois normales.
 
-```{r npa2, echo=F, out.width='.49\\linewidth', fig.height=5.5, fig.width=7.5, fig.show='hold',fig.align='center', warning=F}
+```{r npa2, echo=F, fig.height=4.5}
 plot(rstandard(npa000), ylab = "résidus standardisés", type = "l", col = "blue")
 lines(rstandard(npa001), col = "red")
 ```
@@ -832,7 +831,7 @@ tsdiag(ndi001, gof=15, omit.inital=F)
 tsdiag(ndi100, gof=15, omit.inital=F)
 ```
 
-\textbf{Figure 26} Superposition des graphiques des résidus standardisés des modèles ARIMA(0,1,0) et ARIMA(0,1,1) du data NPA.\newline\newline
+\textbf{Figure 26} Superposition des graphiques des résidus standardisés des modèles ARMA(0,0), ARMA(0,1) et ARMA(1,0) du data NDI.\newline\newline
 
 Ljung-Box nous dit pour les modèles ARMA(0,0), ARMA(0,1) et ARMA(1,0) que leur p-value sont respectivement de `r round(ndi000.lb$p.value, 4)`, `r round(ndi001.lb$p.value, 4)` et `r round(ndi100.lb$p.value, 4)`. Puisqu'elle sont supérieures à 5%, les modèles sont appropriés.
 
