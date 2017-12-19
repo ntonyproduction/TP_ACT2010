@@ -1,5 +1,4 @@
 ---
-title: ''
 lang: fr
 output:
   pdf_document:
@@ -11,7 +10,6 @@ documentclass: article
 ---
 
 \newpage
-
 #Introduction au rapport
 
 Le présent rapport se veut être l'analyse de différentes séries chronologiques. Plus précisément, il a pour but de trouver le modèle qui s'ajuste le plus exactement à nos échantillons de données. En bref, le travail consiste à séparer nos bases de données en un échantillon \textit{entraînement} qui sert à trouver un modèle et en un échantillon \textit{test} qui sert à valider la précision du modèle retenu. Le travail est fait à partir de deux bases de données pour un total de cinq variables à modéliser. La première base de données, traitée au numéro 1, contient les données mensuelles du taux de change du dollar américain par rapport à l'euro de janvier 1999 à décembre 2016. La seconde base de données contient une série de statistiques de la \textit{SAAQ}, soit le nombre d'accidents automobiles avec dommages corporels, le nombre de personnes accidentées, le nombre de demandes d'indemnités et le coût total de l'indemnisation (en dollar constant 2015) pour les années 1978 à 2015 inclusivement. Ces données seront traîtées au numéro 2. Afin d'alléger la lecture du présent rapport, le code R est placé en annexe.
@@ -28,9 +26,8 @@ library('forecast')
 library('plotrix')
 
 # Importation des données
-#taux <- read.csv2("C:/Users/angag426/Documents/GitHub/TP_ACT2010//Taux_de_change_US_Euro.csv")
-taux <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
-#taux <- read.csv2("C:/Users/TEMP/Documents/GitHub/TP_ACT2010/Taux_de_change_US_Euro.csv")
+taux <- read.csv2("Taux_de_change_US_Euro.csv")
+
 rendement<-taux$US.Euro
 anne.mois<-taux$Année.mois
 
@@ -374,8 +371,7 @@ En observant le graphique et la valeur de nos prédictions, on observe que celle
 ## Analyse primaire du jeu de données
 ```{r no2.1, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
 # Importation des données
-#saaq <- read.csv2("C:/Users/angag426/Documents/GitHub/TP_ACT2010/SAAQ-2015.csv")
-saaq <- read.csv2("C:/Users/Anthony/Documents/GitHub/TP_ACT2010/SAAQ-2015.csv")
+saaq <- read.csv2("SAAQ-2015.csv")
 
 naadc<-ts(saaq$NAADC,start=c(saaq$Année[1],1),end=c(saaq$Année[length(saaq$Année)],1), frequency=1)
 npa<-ts(saaq$NPA,start=saaq$Année[1],end=saaq$Année[length(saaq$Année)])
@@ -613,7 +609,7 @@ $$
 \begin{tabular}{| l c |c|c| r |}
   \hline
   Modèle pour NAADC & Paramètres & Valeurs estimés & AIC & Logarithme du max \\
-  & & & &  de vraisemblance \\ \hline \hline
+  & & & &  de vraisemblance \\ \hline
   ARIMA(0,1,0) & $\mu$ & $`r round(naadc000$coef[1],4)`$ & $`r round(naadc000$aic,0)`$ & $`r round(naadc000$loglik,1)`$\\    \hline
   ARIMA(1,1,0) & $\mu$ & $`r round(naadc100$coef[2],4)`$ & $`r round(naadc100$aic,0)`$ & $`r round(naadc100$loglik,1)`$\\
     & $\phi$ & $`r round(naadc100$coef[1],4)`$&  &\\
@@ -625,7 +621,7 @@ $$
 \begin{tabular}{| l c |c|c| r |}
   \hline
   Modèle pour NPA & Paramètres & Valeurs estimés & AIC & Logarithme du max \\
-  & & & &  de vraisemblance \\ \hline \hline
+  & & & &  de vraisemblance \\ \hline
   ARIMA(0,1,0) & $\mu$ & $`r round(npa000$coef[1],4)`$ & $`r round(npa000$aic,0)`$ & $`r round(npa000$loglik,1)`$\\    \hline
   ARIMA(0,0,1) & $\mu$ & $`r round(npa001$coef[2],4)`$ & $`r round(npa001$aic,0)`$ & $`r round(npa001$loglik,1)`$\\
     & $\theta$ & $`r round(npa001$coef[1],4)`$&  &\\
@@ -637,7 +633,7 @@ $$
 \begin{tabular}{| l c |c|c| r |}
   \hline
   Modèle pour NDI & Paramètres & Valeurs estimés & AIC & Logarithme du max \\
-  & & & &  de vraisemblance \\ \hline \hline
+  & & & &  de vraisemblance \\ \hline
   ARIMA(0,1,0) & $\mu$ & $`r round(ndi000$coef[1],4)`$ & $`r round(ndi000$aic,0)`$ & $`r round(ndi000$loglik,1)`$\\        \hline
   ARIMA(0,1,1) & $\mu$ & $`r round(ndi001$coef[2],4)`$ & $`r round(ndi001$aic,0)`$ & $`r round(ndi001$loglik,1)`$\\
     & $\theta$ & $`r round(ndi001$coef[1],4)`$&  &\\
@@ -676,15 +672,16 @@ naadc100.lb <- Box.test(residuals(naadc100), lag = 10, type = "Ljung-Box", fitdf
 
 Les résidus standardisés des deux modèles que nous avons gardés apparaîssent dans le graphique ci-dessous. On remarque que les courbes sont plutôt superposées. Puisque les valeurs des résidus standardisés sont généralement comprises dans une fourchette de $\pm 2$, l'hypothèse de normalité semble adéquate.
 
-```{r fig2.8, echo=F, fig.height=3}
+```{r fig2.8, echo=F, fig.height=4}
 # graphiques résidus standardisés
 plot(rstandard(naadc000), ylab = "résidus standardisés", type = "l", col = "blue")
 lines(rstandard(naadc100), col = "red")
 ```
 
+\newpage
 On regarde maintenant les histogrammes des résidus. Les deux histogrammes ne semblent pas tracer la cloche de la loi normale tel que nous la connaissons.
 
-```{r fig2.9, echo=F, out.width='.49\\linewidth', fig.height=4, fig.width=7, fig.align="left", fig.show='hold',fig.align='center', warning=F}
+```{r fig2.9, echo=F, out.width='.49\\linewidth', fig.height=5.5, fig.width=7, fig.align="left", fig.show='hold',fig.align='center', warning=F}
 # histogrammes
 hist(rstandard(naadc000), xlab='résidus standardisés',ylab='fréquence', main='ARMA(0,0)')
 hist(rstandard(naadc100), xlab='résidus standardisés',ylab='fréquence', main='ARMA(1,0)')
@@ -702,12 +699,12 @@ On effectue maintenant le test de Shapiro-Wilks pour départager nos modèles. L
 
 Par la suite, il faut effectuer le run-test pour déterminer si les résidus sont indépendants. Les p-values de nos modèles ARMA(0,0) et ARMA(1,0) sont `r round(naadc000.rt,4)` et `r round(naadc100.rt,4)`. Puisqu'elles sont nettement supérieures à 5%, on accepte l'hypothèse nulle qui stipule l'indépendance entre les résidus.
 
-```{r fig110, eval=T, echo=F, fig.height=5, fig.width=3.5, fig.show='hold', fig.align='center', warning=F}
+```{r fig110, eval=T, echo=F, fig.height=5.5, fig.width=3.5, fig.show='hold', warning=F}
 tsdiag(naadc000, gof=15, omit.inital=F)
 tsdiag(naadc100, gof=15, omit.inital=F)
 ```
 
-\textbf{Figure 22.} Les trois premiers graphiques concernent le ARMA(0,0) et les trois derniers concernent l'ARMA(1,0) pour notre NAADC.
+\textbf{Figure 22.} Les trois graphiques à gauche concernent le ARMA(0,0) et les graphiquesde droite concernent l'ARMA(1,0) pour notre NAADC.
 
 Ljung-Box nous dit pour les modèles ARMA(0,0) et ARMA(1,0) que leur p-value sont respectivement de `r round(naadc000.lb$p.value, 4)` et `r round(naadc100.lb$p.value, 4)`. Puisqu'elle sont supérieures à 5%, les modèles sont appropriés.
 
@@ -719,6 +716,7 @@ naadc001 <- arima(diff(naadc^-1), order = c(0,0,1), method = "ML")
 
 On regarde maintenant la question de la surparamétrisation. Dans notre cas, puisqu'on a déjà testé le modèle ARMA(1,0), il ne reste qu'à tester le modèle ARMA(0,1). Ce modèle semble adéquat avec un paramètre $\phi$ = 0.128972 et une moyenne $\mu$ = 2.988855e-07. Cependant, on reste avec notre hypothèse de départ et on suppose que le modèle final du NAADC est un bruit blanc, i.e. $\nabla Y_t^{-1} = e_t$.
 
+\newpage
 ### NPA
 ```{r npa1, echo=F}
 #test augmente de Dickey-Fuller
@@ -733,7 +731,7 @@ npa001.lb <- Box.test(residuals(npa001), lag = 10, type = "Ljung-Box", fitdf = 1
 ```
 On cherche alors à savoir si les résidus suivent des lois normales.
 
-```{r npa2, echo=F, out.width='.49\\linewidth', fig.height=5, fig.width=7, fig.align="left", fig.show='hold',fig.align='center', warning=F}
+```{r npa2, echo=F, out.width='.49\\linewidth', fig.height=5.5, fig.width=7.5, fig.show='hold',fig.align='center', warning=F}
 plot(rstandard(npa000), ylab = "résidus standardisés", type = "l", col = "blue")
 lines(rstandard(npa001), col = "red")
 ```
@@ -741,7 +739,7 @@ lines(rstandard(npa001), col = "red")
 
 On remarque que les résidus standardisés sont inférieurs à 2 en valeurs absolues ce qui est souhaitable pour des lois normales centrées réduites.
 
-```{r npa3, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center', warning=F}
+```{r npa3, echo=F, out.width='.49\\linewidth', fig.height=5.5, fig.show='hold',fig.align='center', warning=F}
 # histogrammes
 hist(rstandard(npa000), xlab='résidus standardisés',ylab='fréquence', main='ARMA(0,0)')
 hist(rstandard(npa001), xlab='résidus standardisés',ylab='fréquence', main='ARMA(1,0)')
@@ -749,7 +747,7 @@ hist(rstandard(npa001), xlab='résidus standardisés',ylab='fréquence', main='A
 \textbf{Figure 24} Histogramme des résudies standardisés des modèles ARIMA(0,1,0) et ARIMA(0,1,1) du data NPA.\newline\newline
 
 Les histogrammes des deux modèles à l'étude semblent difficilement tracer de loi normal tel qu'on remarque du graphique ci-dessus.
-```{r npa4, eval=T, echo=F, fig.height=3.3, fig.width=2.3, fig.show='hold', fig.align='center'}
+```{r npa4, eval=T, echo=F, fig.height=4, fig.width=3, fig.show='hold', fig.align='center'}
 qqnorm(rstandard(naadc000), main='ARMA(0,0)',ylab='Quantiles observés',xlab='Quantiles théoriques',cex=0.2)
 qqnorm(rstandard(naadc100),main='ARMA(1,0)',xlab='Quantiles théoriques', ylab='Quantiles observés',cex=0.2)
 ```
@@ -759,9 +757,9 @@ Les graphiques QQ ne semblent pas tracer de belle droite ce qui fait douter de l
 
 Le test de Shapiro-Wilk ne permet toutefois pas de rejetter l'hyptohèse nulle de noramlité des résidus, ni dans le cas ARIMA(0,1,0), ni dans le cas du ARIMA(0,1,1) avec des  p-values respectivent de `r round(npa000.sw$p.value,3)` et `r round(npa001.sw$p.value,3)`. \newline\newline
 
-On ne peut ici rejetter l'hypothèse nulle d'indépendance des résidus du run-test avec des p-values respectives de`r round(npa000.rt,3)` et `r round(npa001.rt,3)` pour les mêmes modèles que ceux testés précédemment.\newline\newline
+On ne peut ici rejetter l'hypothèse nulle d'indépendance des résidus du run-test avec des p-values respectives de `r round(npa000.rt,3)` et `r round(npa001.rt,3)` pour les mêmes modèles que ceux testés précédemment.\newline\newline
 
-```{r npa5, eval=T, echo=F, fig.height=5, fig.width=3.5, fig.show='hold', fig.align='center', warning=F}
+```{r npa5, eval=T, echo=F, fig.height=5.5, fig.width=3.5, fig.show='hold', warning=F}
 tsdiag(ttaux011, gof=15, omit.inital=F)
 tsdiag(ttaux110, gof=15, omit.inital=F)
 ```
@@ -817,7 +815,7 @@ hist(rstandard(ndi100), xlab='résidus standardisés',ylab='fréquence', main='A
 
 On poursuit notre étude des résidus avec le graphique QQ. On remarque que les résidus observés sont sensiblement similaire à leur valeur théorique en cas de normalité.
 
-```{r fig4.10, eval=T, echo=F, out.width='.49\\linewidth', fig.height=4, fig.width=7, fig.align="left", fig.show='hold',fig.align='center', warning=F}
+```{r fig4.10, eval=T, echo=F, out.width='.49\\linewidth', fig.height=5.5, fig.width=8.5, fig.align="left", fig.show='hold',fig.align='center', warning=F}
 # QQ Plot
 qqnorm(rstandard(ndi000), main='ARMA(0,0)',ylab='Quantiles observés',xlab='Quantiles théoriques',cex=0.2)
 qqnorm(rstandard(ndi001),main='ARMA(0,1)',xlab='Quantiles théoriques', ylab='Quantiles observés',cex=0.2)
@@ -828,7 +826,7 @@ On effectue maintenant le test de Shapiro-Wilks pour départager nos modèles. L
 
 Par la suite, il faut effectuer le run-test pour déterminer si les résidus sont indépendants. Les p-values de nos modèles ARMA(0,0), ARMA(0,1) et ARMA(1,0) sont `r round(ndi000.rt,4)`, `r round(ndi001.rt,4)` et `r round(ndi100.rt,4)`. On remarque pour le modèle du bruit blanc (ARMA(0,0)) que la p-value est inférieure à 5%. Dans ce cas, on rejette l'hypothèse que les résidus sont indépendants. Cependant, pour le modèle autorégressif et moyenne mobile, puisque les p-values sont nettement supérieures à 5%, on accepte l'hypothèse nulle qui stipule l'indépendance entre les résidus.
 
-```{r fig1135, eval=T, echo=F, fig.height=5, fig.width=3.5, fig.show='hold', fig.align='center', warning=F}
+```{r fig1135, eval=T, echo=F, fig.height=5.5, fig.width=3.5, fig.show='hold', warning=F}
 tsdiag(ndi000, gof=15, omit.inital=F)
 tsdiag(ndi001, gof=15, omit.inital=F)
 tsdiag(ndi100, gof=15, omit.inital=F)
@@ -869,7 +867,7 @@ cti003.lb <- Box.test(residuals(cti003), lag = 10, type = "Ljung-Box", fitdf = 1
 
 Les résidus standardisés des deux modèles que nous avons gardés apparaîssent dans le graphique ci-dessous. On remarque que les courbes sont plutôt superposées. Puisque les valeurs des résidus standardisés sont généralement comprises dans une fourchette de $\pm 2$, l'hypothèse de normalité semble adéquate.
 
-```{r fig2.12, echo=F, fig.height=3}
+```{r fig2.12, echo=F, fig.height=4.5}
 # graphiques résidus standardisés
 plot(rstandard(cti000), ylab = "résidus standardisés", type = "l", col = "blue")
 lines(rstandard(cti003), col = "red")
@@ -877,7 +875,7 @@ lines(rstandard(cti003), col = "red")
 
 On regarde maintenant les histogrammes des résidus. Les deux histogrammes ne semblent pas tracer la cloche de la loi normale tel que nous la connaissons.
 
-```{r fig2.13, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center', warning=F}
+```{r fig2.13, echo=F, out.width='.49\\linewidth', fig.height=5.5, fig.align="left", fig.show='hold',fig.align='center', warning=F}
 # histogrammes
 hist(rstandard(cti000), xlab='résidus standardisés',ylab='fréquence', main='ARMA(0,0)')
 hist(rstandard(cti003), xlab='résidus standardisés',ylab='fréquence', main='ARMA(1,0)')
@@ -885,7 +883,7 @@ hist(rstandard(cti003), xlab='résidus standardisés',ylab='fréquence', main='A
 
 On poursuit notre étude des résidus avec le graphique QQ. On remarque que les résidus observés ne semblent pas être similaire à leur valeur théorique en cas de normalité.
 
-```{r fig2.14, eval=T, echo=F, fig.height=3.3, fig.width=2.3, fig.show='hold', fig.align='center'}
+```{r fig2.14, eval=T, echo=F, fig.height=4.5, fig.width=3, fig.show='hold'}
 qqnorm(rstandard(cti000), main='ARMA(0,0)',ylab='Quantiles observés',xlab='Quantiles théoriques',cex=0.2)
 qqnorm(rstandard(cti003),main='ARMA(0,3)',xlab='Quantiles théoriques', ylab='Quantiles observés',cex=0.2)
 ```
@@ -894,7 +892,7 @@ On effectue maintenant le test de Shapiro-Wilks pour départager nos modèles. L
 
 Par la suite, il faut effectuer le run-test pour déterminer si les résidus sont indépendants. Les p-values de nos modèles ARMA(0,0) et ARMA(0,3) sont `r round(cti000.rt,4)` et `r round(cti003.rt,4)`. Puisqu'elles sont nettement supérieures à 5%, on accepte l'hypothèse nulle qui stipule l'indépendance entre les résidus.
 
-```{r fig114, eval=T, echo=F, fig.height=5, fig.width=3.5, fig.show='hold', fig.align='center', warning=F}
+```{r fig114, eval=T, echo=F, fig.height=5.5, fig.width=3.5, fig.show='hold', warning=F}
 tsdiag(cti000, gof=15, omit.inital=F)
 tsdiag(cti003, gof=15, omit.inital=F)
 ```
