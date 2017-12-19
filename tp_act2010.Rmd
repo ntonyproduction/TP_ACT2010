@@ -446,6 +446,7 @@ boxcoxic_ndi <- BoxCox.ar(ndi,lambda=seq(-2,1.5,0.01), main="Box-Cox NDI")$ci
 boxcoxv_cti <- BoxCox.ar(cti, lambda=seq(-0.5,2.5,0.01), main="Box-Cox CTI")$mle
 boxcoxic_cti <- BoxCox.ar(cti,lambda=seq(-0.5,2.5,0.01), main="Box-Cox CTI")$ci
 ```
+\textbf{Figure 16.} Graphiques des différents log de de vraisemblance (NAADC en haut à gauche, NPA en haut à droit, NDI en bas à gauche et CTI en bas à droit).
 
 On peut donc observer grâce au maximum de vraisemblance que les valeurs de $\lambda$ sont approximativement `r round(boxcoxv_naadc, 0)`, `r round(boxcoxv_npa, 0)`, `r round(boxcoxv_ndi, 0)` et `r round(boxcoxv_cti, 0)` pour les séries NAADC, NPA, NDI et CTI respectivement. On note qu'il n'y a donc pas de transformation a appliquer à la série CTI.
 
@@ -475,6 +476,8 @@ plot(diff(log(ndi)), xlab='Temps', ylab='', type='o')
 plot(diff(cti), xlab='Temps', ylab='', type='o')
 ```
 
+\textbf{Figure 17.} Graphiques des séries chronologiques transformées diférentiées (NAADC en haut à gauche, NPA en haut à droit, NDI en bas à gauche et CTI en bas à droit).
+
 On poursuit en analysant les fonctions d'autocorrélation de chaque série transformée tel qui suit
 
 ```{r fig2.4.1, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center', warning=F}
@@ -488,7 +491,7 @@ acf(diff(npa^-1), ylab='ACF')
 acf(diff(log(ndi)), ylab='ACF')
 acf(diff(cti), ylab='ACF')
 ```
-**FIGURE WHATEVER ACF**
+\textbf{Figure 18.} Graphiques des fonctions d'autocorrélation de nos séries chronologiques transformées diférentiées (NAADC en haut à gauche, NPA en haut à droit, NDI en bas à gauche et CTI en bas à droit).
 
 Les graphiques ci-dessus suggère l'absence de coefficent de moyenne mobile dans notre série. Qu'en est-il de l'autocorrélation partielle?
 
@@ -503,7 +506,7 @@ pacf(diff(npa^-1), ylab='PACF')
 pacf(diff(log(ndi)), ylab='PACF')
 pacf(diff(cti), ylab='PACF')
 ```
-**FIGURE WHATEVER PACF**
+\textbf{Figure 19.} Graphiques des fonctions d'autocorrélation partielles de nos séries chronologiques transformées diférentiées (NAADC en haut à gauche, NPA en haut à droit, NDI en bas à gauche et CTI en bas à droit).
 
 Les graphiques de l'autocorrélation partielle semblent écarter la présence d'autorégression dans la différentiation de nos modèles. L'analyse des graphiques de l'autocorrélation et de l'autocorrélation partielle suggère donc un bruit blanc comme modèle à considérer pour chacune des séries.
 
@@ -526,7 +529,7 @@ eacf(diff(cti), ar.max=5,ma.max=10)
 \includegraphics{eacf_ndi}
 \hspace{7.5mm} \includegraphics{eacf_cti}
 
-**FIGURE WHATEVER EACF**
+\textbf{Figure 20.} Graphiques des fonctions d'autocorrélation étendues de nos séries chronologiques transformées diférentiées (NAADC en haut à gauche, NPA en haut à droit, NDI en bas à gauche et CTI en bas à droit).
 
 Les graphiques provenant des tests d'autocorrélation étendue nous proposent de façon respective une ARMA(0,0), ARMA(0,0), ARMA(0,1) et ARMA(0,0) pour les modèles transformés et différenciés NAADC, NPA, NDI et CTI.
 
@@ -543,6 +546,8 @@ plot(armasubsets(y=diff(npa^-1), nar=3, nma=3, y.name = "test", ar.method = "ols
 plot(armasubsets(y=diff(log(ndi)), nar=3, nma=3, y.name = "test", ar.method = "ols"))
 plot(armasubsets(y=diff(cti), nar=3, nma=1, y.name = "test", ar.method = "ols"))
 ```
+
+\textbf{Figure 21.} Graphiques des BIC de nos séries chronologiques transformées diférentiées (NAADC en haut à gauche, NPA en haut à droit, NDI en bas à gauche et CTI en bas à droit).
 
 Les graphiques provenant du critère BIC nous proposent de façon respective une AR(1), MA(1), AR(1) et MA(3) (avec $\theta_1$ et $\theta_2$ égal à 0) pour les modèles transformés et différenciés NAADC, NPA, NDI et CTI. Il est pertinent de mentionner que le BIC tente de renvoyer le modèle ARMA(p,q) qui s'applique le mieux à la série sans jamais proposer le bruit blanc.
 
@@ -702,6 +707,8 @@ tsdiag(naadc000, gof=15, omit.inital=F)
 tsdiag(naadc100, gof=15, omit.inital=F)
 ```
 
+\textbf{Figure 22.} Les trois premiers graphiques concernent le ARMA(0,0) et les trois derniers concernent l'ARMA(1,0) pour notre NAADC.
+
 Ljung-Box nous dit pour les modèles ARMA(0,0) et ARMA(1,0) que leur p-value sont respectivement de `r round(naadc000.lb$p.value, 4)` et `r round(naadc100.lb$p.value, 4)`. Puisqu'elle sont supérieures à 5%, les modèles sont appropriés.
 
 Puisque les résidus des 2 modèles semblent suivre une normale, que les log de max de vraisemblance sont identiques tout comme les AIC, on choisit de conserver le modèle ARMA(0,0), i.e. le bruit blanc parce qu'il est simple et que les graphiques ACF et PACF supportent cette hypothèse.
@@ -730,7 +737,7 @@ On cherche alors à savoir si les résidus suivent des lois normales.
 plot(rstandard(npa000), ylab = "résidus standardisés", type = "l", col = "blue")
 lines(rstandard(npa001), col = "red")
 ```
-\textbf{Figure ??} Superposition des graphiques des résidus standardisés des modèles ARIMA(0,1,0) et ARIMA(0,1,1) du data NPA.\newline\newline
+\textbf{Figure 23} Superposition des graphiques des résidus standardisés des modèles ARIMA(0,1,0) et ARIMA(0,1,1) du data NPA.\newline\newline
 
 On remarque que les résidus standardisés sont inférieurs à 2 en valeurs absolues ce qui est souhaitable pour des lois normales centrées réduites.
 
@@ -739,14 +746,14 @@ On remarque que les résidus standardisés sont inférieurs à 2 en valeurs abso
 hist(rstandard(npa000), xlab='résidus standardisés',ylab='fréquence', main='ARMA(0,0)')
 hist(rstandard(npa001), xlab='résidus standardisés',ylab='fréquence', main='ARMA(1,0)')
 ```
-\textbf{Figure ??} Histogramme des résudies standardisés des modèles ARIMA(0,1,0) et ARIMA(0,1,1) du data NPA.\newline\newline
+\textbf{Figure 24} Histogramme des résudies standardisés des modèles ARIMA(0,1,0) et ARIMA(0,1,1) du data NPA.\newline\newline
 
 Les histogrammes des deux modèles à l'étude semblent difficilement tracer de loi normal tel qu'on remarque du graphique ci-dessus.
 ```{r npa4, eval=T, echo=F, fig.height=3.3, fig.width=2.3, fig.show='hold', fig.align='center'}
 qqnorm(rstandard(naadc000), main='ARMA(0,0)',ylab='Quantiles observés',xlab='Quantiles théoriques',cex=0.2)
 qqnorm(rstandard(naadc100),main='ARMA(1,0)',xlab='Quantiles théoriques', ylab='Quantiles observés',cex=0.2)
 ```
-\textbf{Figure ??} graphique QQ des modèles ARIMA(0,1,0) et ARIMA(0,1,1) \newline\newline
+\textbf{Figure 25} graphique QQ des modèles ARIMA(0,1,0) et ARIMA(0,1,1) \newline\newline
 
 Les graphiques QQ ne semblent pas tracer de belle droite ce qui fait douter de la fiabilité de l'hypothèse de normalité.\newline\newline 
 
@@ -827,6 +834,8 @@ tsdiag(ndi001, gof=15, omit.inital=F)
 tsdiag(ndi100, gof=15, omit.inital=F)
 ```
 
+\textbf{Figure 26} Superposition des graphiques des résidus standardisés des modèles ARIMA(0,1,0) et ARIMA(0,1,1) du data NPA.\newline\newline
+
 Ljung-Box nous dit pour les modèles ARMA(0,0), ARMA(0,1) et ARMA(1,0) que leur p-value sont respectivement de `r round(ndi000.lb$p.value, 4)`, `r round(ndi001.lb$p.value, 4)` et `r round(ndi100.lb$p.value, 4)`. Puisqu'elle sont supérieures à 5%, les modèles sont appropriés.
 
 Nous avons donc écarté l'hypothèse de modèle basé uniquement sur le bruit blanc. De plus, puisque le graphique ACF semble montrer une forme autorégressive, et que le BIC supporte cette hypothèse, et que l'histogramme des résidus du ARMA(1,0) est plus représentatif d'une loi normale que l'ARMA(0,1), nous décidons de garder le modèle ARMA(1,0).
@@ -889,6 +898,8 @@ Par la suite, il faut effectuer le run-test pour déterminer si les résidus son
 tsdiag(cti000, gof=15, omit.inital=F)
 tsdiag(cti003, gof=15, omit.inital=F)
 ```
+
+\textbf{Figure 27} Superposition des graphiques des résidus standardisés des modèles ARIMA(0,1,0) et ARIMA(0,1,3) du data CTI.\newline\newline
 
 Ljung-Box nous dit pour les modèles ARMA(0,0) et ARMA(0,3) que leur p-value sont respectivement de `r round(cti000.lb$p.value, 4)` et `r round(cti003.lb$p.value, 4)`. Puisqu'elle sont supérieures à 5%, les modèles sont appropriés.
 
@@ -1011,11 +1022,6 @@ On rappelle que notre modèle final est $\nabla Y_t = e_t$. Les prédictions ain
 ```{r fig2.17, eval=T, echo=F, fig.height=3, fig.show='hold', fig.align='center'}
 plot(cti000, n.ahead=5, ylab='Coût', xlab='Années', cex=0.5)
 ```
-
-\newpage
-
-# Annexe
-## Code
 
 
 
