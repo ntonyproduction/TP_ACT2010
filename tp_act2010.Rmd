@@ -541,12 +541,10 @@ plot(armasubsets(y=diff(npa^-1), nar=3, nma=3, y.name = "test", ar.method = "ols
 ```{r fig2.7.2, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center', warning=F}
 # graphiques des BIC
 plot(armasubsets(y=diff(log(ndi)), nar=3, nma=3, y.name = "test", ar.method = "ols"))
-plot(armasubsets(y=diff(cti), nar=3, nma=3, y.name = "test", ar.method = "ols"))
+plot(armasubsets(y=diff(cti), nar=3, nma=1, y.name = "test", ar.method = "ols"))
 ```
 
 Les graphiques provenant du critère BIC nous proposent de façon respective une AR(1), MA(1), AR(1) et MA(3) (avec $\theta_1$ et $\theta_2$ égal à 0) pour les modèles transformés et différenciés NAADC, NPA, NDI et CTI. Il est pertinent de mentionner que le BIC tente de renvoyer le modèle ARMA(p,q) qui s'applique le mieux à la série sans jamais proposer le bruit blanc.
-
-**T TU CERTAIN DE LA DERNIERE PHRASE??? PCQ Y ME PROPOSE QUAND MEME DES AR(0)**
 
 Les modèles testés seront donc les suivants:
 
@@ -656,6 +654,63 @@ $$
   \hline
  \end{tabular}
 $$
+
+On peut maintenant faire l'analyse de nos résidus pour faire notre choix de modèle. Puisque nous avons plusieurs modèles par série chronologique, nous allons séparer les graphiques en 4 sections, i.e. pour les 4 modèles transformés différenciés.
+
+### NAADC
+```{r no2.4, echo=F}
+naadc000.sw <- shapiro.test(rstandard(naadc000))
+naadc100.sw <- shapiro.test(rstandard(naadc100))
+
+naadc000.rt <- runs(residuals(naadc000))$pvalue
+naadc100.rt <- runs(residuals(naadc100))$pvalue
+
+naadc000.lb <- Box.test(residuals(naadc000), lag = 10, type = "Ljung-Box", fitdf = 1)
+naadc100.lb <- Box.test(residuals(naadc100), lag = 10, type = "Ljung-Box", fitdf = 1)
+```
+
+Les résidus standardisés des deux modèles que nous avons gardés apparaîssent dans le graphique ci-dessous. On remarque que les courbes sont plutôt superposées. Puisque les valeurs des résidus standardisés sont généralement comprises dans une fourchette de $\pm 2$, l'hypothèse de normalité semble adéquate
+
+```{r fig2.8, echo=F, fig.height=3}
+# graphiques résidus standardisés
+plot(rstandard(naadc000), ylab = "résidus standardisés", type = "l", col = "blue")
+lines(rstandard(naadc100), col = "red")
+```
+
+On regarde maintenant les histogrammes des résidus. Les deux histogrammes ne semblent pas tracer la cloche de la loi normale tel que nous la connaissons.
+
+```{r fig2.9, echo=F, out.width='.49\\linewidth', fig.height=5, fig.align="left", fig.show='hold',fig.align='center', warning=F}
+# histogrammes
+hist(rstandard(naadc000), xlab='résidus standardisés',ylab='fréquence', main='ARMA(0,0)')
+hist(rstandard(naadc100), xlab='résidus standardisés',ylab='fréquence', main='ARMA(1,0)')
+```
+
+On poursuit notre étude des résidus avec le graphique QQ. On remarque que les résidus observés ne semblent pas être similaire à leur valeur théorique en cas de normalité.
+
+```{r fig2.10, eval=T, echo=F, fig.height=3.3, fig.width=2.3, fig.show='hold', fig.align='center'}
+qqnorm(rstandard(naadc000), main='ARMA(0,0)',ylab='Quantiles observés',xlab='Quantiles théoriques',cex=0.2)
+qqnorm(rstandard(naadc100),main='ARMA(1,0)',xlab='Quantiles théoriques', ylab='Quantiles observés',cex=0.2)
+```
+
+On effectue maintenant le test de Shapiro-Wilks pour départager nos modèles. Les p-values respectives du modèle ARMA(0,0) et ARMA(1,0) sont `r round(naadc000.sw$p.value,4)` et `r round(naadc100.sw$p.value,4)`. Puisque les p-values sont supérieures à 5%, nous gardons l'hypothèse nulle qui stipule que les résidus suivent une loi normale.
+
+Par la suite, il faut effectuer le run-test pour déterminer si les résidus sont indépendants. Les p-values de nos modèles ARMA(0,0) et ARMA(1,0) sont `r round(naadc000.rt,4)` et `r round(naadc100.rt,4)`. Puisqu'elles sont nettement supérieures à 5%, on accepte l'hypothèse nulle qui stipule l'indépendance entre les résidus.
+
+
+
+### NPA
+```{r no2.5, echo=F}
+
+```
+
+### NDI
+```{r no2.6, echo=F}
+
+```
+
+### CTI
+
+
 
 \newpage
 
